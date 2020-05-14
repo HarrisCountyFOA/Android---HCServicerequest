@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="ColorPrimaryBackground">#000000</color>
+    <color name="Border">#3D3D41</color>
+    <color name="ColorOnSurface">#2C2C30</color>
+</resources>

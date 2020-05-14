@@ -1,0 +1,225 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/cl"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/ColorPrimaryBackground"
+    tools:context=".ProfileActivity">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <com.google.android.material.appbar.AppBarLayout
+            android:id="@+id/app_bar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:theme="@style/AppTheme.AppBarOverlay">
+
+            <androidx.appcompat.widget.Toolbar
+                android:id="@+id/toolbar"
+                android:layout_width="match_parent"
+                android:layout_height="?attr/actionBarSize"
+                app:popupTheme="@style/AppTheme.PopupOverlay">
+
+                <TextView
+                    android:id="@+id/toolbar_title"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:text="@string/profile"
+                    android:textColor="@color/ColorPrimaryText"
+                    android:textSize="20sp"
+                    android:textStyle="bold" />
+
+            </androidx.appcompat.widget.Toolbar>
+        </com.google.android.material.appbar.AppBarLayout>
+
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="@color/ColorPrimaryBackground"
+                    tools:context=".ProfileActivity">
+
+                    <EditText
+                        android:id="@+id/state"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="8dp"
+                        android:layout_marginTop="16dp"
+                        android:layout_marginEnd="8dp"
+                        android:backgroundTint="@color/ColorPrimaryText"
+                        android:ems="10"
+                        android:hint="@string/PROFILE_STATE"
+                        android:importantForAutofill="no"
+                        android:inputType="text"
+                        android:maxLength="10"
+                        android:textCursorDrawable="@null"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@+id/city" />
+
+                    <EditText
+                        android:id="@+id/lastName"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="8dp"
+                        android:layout_marginTop="16dp"
+                        android:layout_marginEnd="8dp"
+                        android:backgroundTint="@color/ColorPrimaryText"
+                        android:ems="10"
+                        android:hint="@string/PROFILE_LASTNAME"
+                        android:importantForAutofill="no"
+                        android:inputType="textPersonName"
+                        android:maxLength="50"
+                        android:textCursorDrawable="@null"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintHorizontal_bias="0.0"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@+id/FirstName" />
+
+                    <EditText
+                        android:id="@+id/secondaryphone"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="8dp"
+                        android:layout_marginTop="16dp"
+                        android:layout_marginEnd="8dp"
+                        android:backgroundTint="@color/ColorPrimaryText"
+                        android:hint="@string/PROFILE_SECONDARYPHONE"
+                        android:importantForAutofill="no"
+                        android:inputType="phone"
+                        android:maxLength="14"
+                        android:textCursorDrawable="@null"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintHorizontal_bias="0.0"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@+id/primaryphone"></EditText>
+
+                    <EditText
+                        android:id="@+id/email"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="8dp"
+                        android:layout_marginTop="16dp"
+                        android:layout_marginEnd="8dp"
+                        android:backgroundTint="@color/ColorPrimaryText"
+                        android:hint="@string/PROFILE_EMAIL"
+                        android:importantForAutofill="no"
+                        android:inputType="textEmailAddress"
+                        android:maxLength="100"
+                        android:textCursorDrawable="@null"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintHorizontal_bias="0.0"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@+id/lastName"></EditText>
+
+                    <EditText
+                        android:id="@+id/primaryphone"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="8dp"
+                        android:layout_marginTop="16dp"
+                        android:layout_marginEnd="8dp"
+                        android:backgroundTint="@color/ColorPrimaryText"
+                        android:hint="@string/PROFILE_PRIMARYPHONE"
+                        android:importantForAutofill="no"
+                        android:inputType="phone"
+                        android:maxLength="14"
+                        android:textCursorDrawable="@null"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintHorizontal_bias="1.0"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@+id/zipcode"></EditText>
+
+                    <EditText
+                        android:id="@+id/FirstName"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="8dp"
+                        android:layout_marginTop="16dp"
+                        android:layout_marginEnd="8dp"
+                        android:backgroundTint="@color/ColorPrimaryText"
+                        android:ems="10"
+                        android:hint="@string/PROFILE_FIRSTNAME"
+                        android:importantForAutofill="no"
+                        android:inputType="textPersonName"
+                        android:maxLength="50"
+                        android:textCursorDrawable="@null"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintHorizontal_bias="0.0"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
+
+                    <EditText
+                        android:id="@+id/Address"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="8dp"
+                        android:layout_marginTop="16dp"
+                        android:layout_marginEnd="8dp"
+                        android:backgroundTint="@color/ColorPrimaryText"
+                        android:hint="@string/PROFILE_ADDRESS"
+                        android:importantForAutofill="no"
+                        android:inputType="text"
+                        android:maxLength="100"
+                        android:textCursorDrawable="@null"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintHorizontal_bias="0.0"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@+id/email"></EditText>
+
+                    <EditText
+                        android:id="@+id/city"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="8dp"
+                        android:layout_marginTop="16dp"
+                        android:layout_marginEnd="8dp"
+                        android:backgroundTint="@color/ColorPrimaryText"
+                        android:ems="10"
+                        android:hint="@string/PROFILE_CITY"
+                        android:importantForAutofill="no"
+                        android:inputType="text"
+                        android:maxLength="50"
+                        android:textCursorDrawable="@null"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@+id/Address" />
+
+                    <EditText
+                        android:id="@+id/zipcode"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="8dp"
+                        android:layout_marginTop="16dp"
+                        android:layout_marginEnd="8dp"
+                        android:backgroundTint="@color/ColorPrimaryText"
+                        android:ems="10"
+                        android:hint="@string/PROFILE_ZIPCODE"
+                        android:importantForAutofill="no"
+                        android:inputType="number"
+                        android:maxLength="10"
+                        android:textCursorDrawable="@null"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@+id/state" />
+
+
+                </androidx.constraintlayout.widget.ConstraintLayout>
+            </LinearLayout>
+        </ScrollView>
+    </LinearLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>

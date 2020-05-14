@@ -1,0 +1,266 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/ColorPrimaryBackground"
+    tools:context=".NewRequestActivity">
+
+    <ScrollView
+        android:id="@+id/ScrollView01"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:scrollbars="vertical">
+
+        <LinearLayout
+            android:id="@+id/lLay1"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:padding="15dp">
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="0dp"
+                app:endIconMode="clear_text"
+                app:hintTextAppearance="@style/TextLabel">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/place_search"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:layout_marginTop="16dp"
+                    android:layout_marginEnd="8dp"
+                    android:layout_marginBottom="0dp"
+                    android:hint="Location"
+                    android:inputType="textPostalAddress" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <ViewAnimator
+                android:id="@+id/view_animator"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginStart="8dp"
+                android:layout_marginTop="-6dp"
+                android:layout_marginEnd="8dp">
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/places_recycler_view"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    app:layout_behavior="@string/appbar_scrolling_view_behavior"></androidx.recyclerview.widget.RecyclerView>
+            </ViewAnimator>
+
+            <TextView
+                style="@style/TextLabel"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:paddingLeft="12dp"
+                android:text="Request Type" />
+
+            <Spinner
+                android:id="@+id/spinnerRequest"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="5dp"
+                android:layout_marginBottom="16dp"
+                android:spinnerMode="dialog"
+
+                />
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_marginStart="10dp"
+                android:layout_marginTop="-5dp"
+                android:layout_marginEnd="8dp"
+                android:background="@android:color/white" />
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="24dp"
+
+                app:hintTextAppearance="@style/TextLabel">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/txtDescription"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:layout_marginTop="16dp"
+                    android:layout_marginEnd="8dp"
+                    android:layout_marginBottom="0dp"
+                    android:hint="Description"
+                    android:inputType="textMultiLine"
+                    android:maxLength="1000"
+                    android:maxLines="6"
+                    android:minLines="1"
+                    android:scrollbars="vertical"
+                    android:scrollHorizontally="false"
+
+                    />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <TextView
+                android:id="@+id/txtAddPhoto"
+                style="@style/TextLabel"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:layout_marginBottom="5dp"
+                android:drawableLeft="@drawable/ic_camera"
+                android:drawablePadding="10dp"
+                android:paddingLeft="14dp"
+                android:text="Add Photo" />
+
+            <ImageView
+                android:id="@+id/btnPicture"
+                android:layout_width="match_parent"
+                android:layout_height="175dp"
+                android:contentDescription="thumbnail"
+                android:padding="10dp"
+                android:scaleType="centerCrop"
+                android:src="@drawable/ic_camera" />
+
+
+            <androidx.cardview.widget.CardView
+                android:id="@+id/cmView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                app:cardBackgroundColor="@color/Border">
+
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:id="@+id/cons"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="15dp"
+                    android:layout_marginBottom="15dp"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="parent">
+
+                    <TextView
+                        android:id="@+id/text1"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:paddingStart="16dp"
+                        android:paddingEnd="0dp"
+                        android:paddingBottom="15dp"
+                        android:text="@string/PROFILE_COMMTEXT"
+                        android:textAppearance="?attr/textAppearanceListItem"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
+
+                    <TextView
+                        android:id="@+id/text2"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:paddingStart="16dp"
+                        android:paddingEnd="0dp"
+                        android:textAppearance="?attr/textAppearanceListItem"
+                        android:textColor="@color/ColorPrimaryText"
+                        android:textSize="26sp"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@+id/text1" />
+
+                    <TextView
+                        android:id="@+id/text3"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="1dp"
+                        android:paddingStart="16dp"
+                        android:paddingEnd="0dp"
+                        android:paddingBottom="10dp"
+                        android:textAppearance="?attr/textAppearanceListItem"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@+id/text2" />
+
+                    <TextView
+                        android:id="@+id/text4"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="15dp"
+                        android:drawableLeft="@drawable/ic_at"
+                        android:drawablePadding="5dp"
+                        android:paddingStart="16dp"
+                        android:paddingEnd="0dp"
+                        android:paddingBottom="8dp"
+                        android:textAppearance="?attr/textAppearanceListItem"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@+id/text3" />
+
+                    <TextView
+                        android:id="@+id/text5"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:drawableLeft="@drawable/ic_phone"
+                        android:drawablePadding="5dp"
+                        android:paddingStart="16dp"
+                        android:paddingEnd="0dp"
+                        android:paddingBottom="8dp"
+                        android:textAppearance="?attr/textAppearanceListItem"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@+id/text4" />
+
+                    <TextView
+                        android:id="@+id/text6"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="1dp"
+                        android:drawableLeft="@drawable/ic_external_link_alt"
+                        android:drawablePadding="5dp"
+                        android:paddingStart="16dp"
+                        android:paddingEnd="0dp"
+                        android:paddingBottom="8dp"
+                        android:textAppearance="?attr/textAppearanceListItem"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@+id/text5" />
+
+                    <TextView
+                        android:id="@+id/text7"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:drawableLeft="@drawable/ic_map_marker"
+                        android:drawablePadding="5dp"
+                        android:paddingStart="16dp"
+                        android:paddingTop="8dp"
+                        android:paddingEnd="0dp"
+                        android:textAppearance="?attr/textAppearanceListItem"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@+id/text6" />
+
+                    <TextView
+                        android:id="@+id/text8"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="1dp"
+                        android:paddingStart="34dp"
+                        android:paddingEnd="0dp"
+                        android:paddingBottom="4dp"
+                        android:textAppearance="?attr/textAppearanceListItem"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@+id/text7" />
+
+                </androidx.constraintlayout.widget.ConstraintLayout>
+
+            </androidx.cardview.widget.CardView>
+
+        </LinearLayout>
+    </ScrollView>
+
+</androidx.constraintlayout.widget.ConstraintLayout>
