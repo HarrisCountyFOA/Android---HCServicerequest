@@ -54,6 +54,7 @@
         <item name="colorPrimary">@color/ColorPrimaryBackground</item>
         <item name="colorPrimaryDark">@color/ColorPrimaryBackground</item>
         <item name="android:textColor">#ffffff</item>
+        <item name="android:textColorLink">#ffffff</item>
        <!-- <item name="colorAccent">@color/colorAccent</item>
         <item name="colorControlNormal">@color/TEXTCOLOR</item>
         <item name="colorControlActivated">@color/colorAccent</item>
