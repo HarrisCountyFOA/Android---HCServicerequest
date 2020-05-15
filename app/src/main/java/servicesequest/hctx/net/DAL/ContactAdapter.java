@@ -47,10 +47,10 @@ public class ContactAdapter extends RecyclerView.Adapter<ContactAdapter.ContactV
             website.setText(p.website);
 
             TextView txtaddress =  (TextView)vi.findViewById(R.id.address);
-            txtaddress.setText(p.streetaddress);
+            txtaddress.setText(p.streetaddress + "\n" + p.city);
 
-            TextView txtcity =  (TextView)vi.findViewById(R.id.city);
-            txtcity.setText(p.city );
+//            TextView txtcity =  (TextView)vi.findViewById(R.id.city);
+//            txtcity.setText(p.city );
         }
     }
 

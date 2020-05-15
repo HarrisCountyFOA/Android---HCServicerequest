@@ -41,9 +41,12 @@
         <TextView
             android:id="@+id/email"
             android:layout_width="0dp"
-            android:layout_height="wrap_content" android:drawableLeft="@drawable/ic_at" android:drawablePadding="3dp"
+            android:layout_height="wrap_content"
             android:layout_marginStart="10dp"
             android:layout_marginTop="14dp"
+            android:autoLink="email"
+            android:drawableLeft="@drawable/ic_at"
+            android:drawablePadding="3dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/title" />
@@ -51,10 +54,12 @@
         <TextView
             android:id="@+id/phone"
             android:layout_width="0dp"
-            android:layout_height="wrap_content" android:drawableLeft="@drawable/ic_phone"
-            android:drawablePadding="3dp"
+            android:layout_height="wrap_content"
             android:layout_marginStart="10dp"
             android:layout_marginTop="14dp"
+            android:autoLink="phone"
+            android:drawableLeft="@drawable/ic_phone"
+            android:drawablePadding="3dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/email" />
@@ -62,10 +67,12 @@
         <TextView
             android:id="@+id/website"
             android:layout_width="0dp"
-            android:layout_height="wrap_content" android:drawableLeft="@drawable/ic_external_link_alt"
-            android:drawablePadding="3dp"
+            android:layout_height="wrap_content"
             android:layout_marginStart="10dp"
             android:layout_marginTop="14dp"
+            android:autoLink="web"
+            android:drawableLeft="@drawable/ic_external_link_alt"
+            android:drawablePadding="3dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/phone" />
@@ -73,26 +80,30 @@
         <TextView
             android:id="@+id/address"
             android:layout_width="0dp"
-            android:layout_height="wrap_content" android:drawableLeft="@drawable/ic_map_marker"
-            android:drawablePadding="3dp"
+            android:layout_height="wrap_content"
             android:layout_marginStart="10dp"
             android:layout_marginTop="14dp"
+            android:layout_marginBottom="14dp"
+            android:autoLink="map"
+            android:drawableLeft="@drawable/ic_map_marker"
+            android:drawablePadding="3dp"
+            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/website" />
 
-        <TextView
-            android:id="@+id/city"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="10dp"
-            android:layout_marginTop="1dp"
-            android:layout_marginBottom="14dp"
-            android:paddingStart="16dp" android:paddingEnd="0dp"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/address" />
+        <!--        <TextView-->
+        <!--            android:id="@+id/city"-->
+        <!--            android:layout_width="0dp"-->
+        <!--            android:layout_height="wrap_content"-->
+        <!--            android:layout_marginStart="10dp"-->
+        <!--            android:layout_marginTop="1dp"-->
+        <!--            android:layout_marginBottom="14dp"-->
+        <!--            android:paddingStart="16dp" android:paddingEnd="0dp"-->
+        <!--            app:layout_constraintBottom_toBottomOf="parent"-->
+        <!--            app:layout_constraintEnd_toEndOf="parent"-->
+        <!--            app:layout_constraintStart_toStartOf="parent"-->
+        <!--            app:layout_constraintTop_toBottomOf="@+id/address" />-->
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
