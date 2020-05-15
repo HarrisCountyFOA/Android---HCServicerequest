@@ -100,7 +100,14 @@ public class RequestDataManager {
         }
 
         cu.close();
-        return requests;
+
+        ArrayList<Request> sortedrequests = new ArrayList<Request>();
+        for(int i = requests.size() - 1; i >= 0; i--)
+        {
+            sortedrequests.add(requests.get(i));
+        }
+
+        return sortedrequests;
     }
 
     public Request getRequestByID(ServiceRequestDbHelper dbHelper, String Id)

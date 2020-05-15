@@ -43,7 +43,7 @@ public class ProfileList extends AppCompatActivity {
     TextView text5;
     TextView text6;
     TextView text7;
-    TextView text8;
+    //TextView text8;
     String profileId;
     ServiceRequestDbHelper dbHelper;
     CardView cmView;
@@ -79,7 +79,7 @@ public class ProfileList extends AppCompatActivity {
         text5 = findViewById(R.id.text5);
         text6 = findViewById(R.id.text6);
         text7 = findViewById(R.id.text7);
-        text8 = findViewById(R.id.text8);
+       // text8 = findViewById(R.id.text8);
 
 
         initScreen();
@@ -233,8 +233,7 @@ public class ProfileList extends AppCompatActivity {
                             text4.setText(comContact.email);
                             text5.setText(comContact.phone);
                             text6.setText(comContact.website);
-                            text7.setText(comContact.streetaddress);
-                            text8.setText(comContact.city);
+                            text7.setText(comContact.streetaddress + "\n" + comContact.city);
                             cmView.setVisibility(View.VISIBLE);
                         } else {
                             cmView.setVisibility(View.GONE);
