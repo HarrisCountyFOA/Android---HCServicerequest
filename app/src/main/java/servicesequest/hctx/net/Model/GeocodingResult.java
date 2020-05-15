@@ -18,7 +18,7 @@ public class GeocodingResult implements Serializable {
      * route), "New York" (the city) and "NY" (the US state). These address components contain
      * additional information.
      */
-    public String formattedAddress;
+    public String formatted_address;
 
     /**
      * All the localities contained in a postal code. This is only present when the result is a postal
@@ -65,7 +65,7 @@ public class GeocodingResult implements Serializable {
         }
         sb.append(" placeId=").append(placeId);
         sb.append(" ").append(geometry);
-        sb.append(", formattedAddress=").append(formattedAddress);
+        sb.append(", formattedAddress=").append(formatted_address);
         sb.append(", types=").append(Arrays.toString(types));
         if (postcodeLocalities != null && postcodeLocalities.length > 0) {
             sb.append(", postcodeLocalities=").append(Arrays.toString(postcodeLocalities));
