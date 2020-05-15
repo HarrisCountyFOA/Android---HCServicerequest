@@ -81,28 +81,35 @@ public class ContactActivity extends AppCompatActivity {
             switch (item.getItemId()) {
                 case R.id.navigation_home:
                     Intent hi = new Intent(getApplicationContext(), MainActivity.class);
+                    hi.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
                     startActivity(hi);
                     return true;
                 case R.id.navigation_dashboard:
                     Intent ti = new Intent(getApplicationContext(), TermsOfUseActivity.class);
+                    ti.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
                     startActivity(ti);
                     return true;
                 case R.id.navigation_notifications:
+
                     Boolean profileSet = _appPrefs.getBoolean("ProfileSet");
 
                     if(profileSet)
                     {
                         Intent pi = new Intent(getApplicationContext(), ProfileList.class);
+                        pi.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
                         startActivity(pi);
                     }
                     else
                     {
                         Intent pi = new Intent(getApplicationContext(), ProfileActivity.class);
+                        pi.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
                         startActivity(pi);
                     }
+
                     return true;
                 case R.id.navigation_contacts:
                     Intent ai = new Intent(getApplicationContext(), ContactActivity.class);
+                    ai.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
                     startActivity(ai);
                     return true;
             }

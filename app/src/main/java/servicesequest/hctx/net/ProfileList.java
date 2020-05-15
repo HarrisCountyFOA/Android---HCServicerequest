@@ -1,5 +1,7 @@
 package servicesequest.hctx.net;
 
+import android.app.Activity;
+import android.app.Instrumentation;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
@@ -9,6 +11,7 @@ import android.view.View;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.cardview.widget.CardView;
@@ -94,29 +97,36 @@ public class ProfileList extends AppCompatActivity {
         public boolean onNavigationItemSelected(@NonNull MenuItem item) {
             switch (item.getItemId()) {
                 case R.id.navigation_home:
-                    Intent ti = new Intent(getApplicationContext(), MainActivity.class);
-                    startActivity(ti);
+                    Intent hi = new Intent(getApplicationContext(), MainActivity.class);
+                    hi.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+                    startActivity(hi);
                     return true;
                 case R.id.navigation_dashboard:
-                    Intent mi = new Intent(getApplicationContext(), TermsOfUseActivity.class);
-                    startActivity(mi);
+                    Intent ti = new Intent(getApplicationContext(), TermsOfUseActivity.class);
+                    ti.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+                    startActivity(ti);
                     return true;
                 case R.id.navigation_notifications:
+
                     Boolean profileSet = _appPrefs.getBoolean("ProfileSet");
 
                     if(profileSet)
                     {
                         Intent pi = new Intent(getApplicationContext(), ProfileList.class);
+                        pi.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
                         startActivity(pi);
                     }
                     else
                     {
                         Intent pi = new Intent(getApplicationContext(), ProfileActivity.class);
+                        pi.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
                         startActivity(pi);
                     }
+
                     return true;
                 case R.id.navigation_contacts:
                     Intent ai = new Intent(getApplicationContext(), ContactActivity.class);
+                    ai.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
                     startActivity(ai);
                     return true;
             }
@@ -134,20 +144,36 @@ public class ProfileList extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.action_edit:
-                openProfileActivity(null);
+                openProfileActivity(null, true);
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
         }
     }
 
-    public void openProfileActivity(View view) {
+    public void openProfileActivity(View view, Boolean isEdit) {
         Intent ai = new Intent(this, ProfileActivity.class);
-
         if (profileId != null) {
             ai.putExtra(ServiceRequestDbContract.ProfileEntry.COLUMN_ID, profileId);
         }
-        startActivity(ai);
+
+        if(isEdit)
+        {
+            startActivityForResult(ai, 1);
+        }
+        else {
+            startActivity(ai);
+        }
+
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (resultCode == Activity.RESULT_OK) {
+            initScreen();
+        }
     }
 
     private void initScreen() {
@@ -215,7 +241,7 @@ public class ProfileList extends AppCompatActivity {
                         }
 
                     } else {
-                        openProfileActivity(null);
+                        openProfileActivity(null, false);
                     }
 
                 } catch (Exception ex) {

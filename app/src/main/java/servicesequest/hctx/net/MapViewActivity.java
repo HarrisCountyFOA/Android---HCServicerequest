@@ -60,6 +60,7 @@ public class MapViewActivity extends AppCompatActivity implements OnMapReadyCall
             @Override
             public void onClick(View view) {
                 Intent ti = new Intent(getApplicationContext(), MainActivity.class);
+                ti.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
                 startActivity(ti);
             }
         });

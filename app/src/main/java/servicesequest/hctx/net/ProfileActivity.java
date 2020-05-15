@@ -81,15 +81,17 @@ public class ProfileActivity extends AppCompatActivity {
     }
 
 
-    @Override
-    public void onBackPressed() {
-        if (profileId == null) {
-            startActivity(new Intent(this, MainActivity.class));
-        } else {
-            startActivity(new Intent(this, ProfileList.class));
-        }
-        finish();
-    }
+//    @Override
+//    public void onBackPressed() {
+//        if (profileId == null) {
+//            Intent ai = new Intent(this, MainActivity.class);
+//            startActivity(ai);
+//        } else {
+//            Intent ai = new Intent(this, ProfileList.class);
+//            startActivity(ai);
+//        }
+//        finish();
+//    }
 
     private void initScreen(String id) {
 
@@ -133,14 +135,14 @@ public class ProfileActivity extends AppCompatActivity {
             case R.id.action_save:
                 saveProfile(null);
                 return true;
-            case android.R.id.home:
-                if (profileId == null) {
-                    startActivity(new Intent(this, MainActivity.class));
-                } else {
-                    startActivity(new Intent(this, ProfileList.class));
-                }
-                finish();
-                return true;
+//            case android.R.id.home:
+////                if (profileId == null) {
+////                    startActivity(new Intent(this, MainActivity.class));
+////                } else {
+////                    startActivity(new Intent(this, ProfileList.class));
+////                }
+//              //  finish();
+//                return true;
             default:
                 return super.onOptionsItemSelected(item);
         }
@@ -188,13 +190,16 @@ public class ProfileActivity extends AppCompatActivity {
 
                         _appPrefs.putBoolean("ProfileSet", true);
 
-                        Intent ai = new Intent(getApplicationContext(), ProfileList.class);
-                        startActivity(ai);
+                        if (profileId == null) {
+                            Intent ai = new Intent(getApplicationContext(), ProfileList.class);
+                            startActivity(ai);
 
-                        finish();
-                    }
-                    else
-                    {
+                            finish();
+                        } else {
+                            setResult(RESULT_OK, new Intent());
+                            finish();
+                        }
+                    } else {
                         Toast.makeText(getApplicationContext(), "Failed to save profile. Please try again!!", Toast.LENGTH_LONG).show();
                     }
                 }

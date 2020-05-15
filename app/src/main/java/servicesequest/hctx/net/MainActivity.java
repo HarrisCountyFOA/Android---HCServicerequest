@@ -57,7 +57,8 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 Intent ti = new Intent(getApplicationContext(), MapViewActivity.class);
-                startActivityForResult(ti, 1);
+                ti.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+                startActivity(ti);
             }
         });
 
@@ -66,7 +67,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 Intent ti = new Intent(getApplicationContext(), NewRequestActivity.class);
-                startActivityForResult(ti, 2);
+                startActivityForResult(ti, 1);
             }
         });
 
@@ -83,7 +84,6 @@ public class MainActivity extends AppCompatActivity {
                             public void onItemClick(Request item) {
 
                                 Intent ai = new Intent(getApplicationContext(), RequestDetailsActivity.class);
-
                                 if (item != null) {
                                     ai.putExtra(ServiceRequestDbContract.RequestEntry.COLUMN_REPORTS_ID, item._id);
                                 }
@@ -129,11 +129,13 @@ public class MainActivity extends AppCompatActivity {
         public boolean onNavigationItemSelected(@NonNull MenuItem item) {
             switch (item.getItemId()) {
                 case R.id.navigation_home:
-                    Intent hi = new Intent(getApplicationContext(), MainActivity.class);
-                    startActivity(hi);
+                        Intent hi = new Intent(getApplicationContext(), MainActivity.class);
+                        hi.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+                        startActivity(hi);
                     return true;
                 case R.id.navigation_dashboard:
                     Intent ti = new Intent(getApplicationContext(), TermsOfUseActivity.class);
+                    ti.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
                     startActivity(ti);
                     return true;
                 case R.id.navigation_notifications:
@@ -143,17 +145,20 @@ public class MainActivity extends AppCompatActivity {
                     if(profileSet)
                     {
                         Intent pi = new Intent(getApplicationContext(), ProfileList.class);
+                        pi.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
                         startActivity(pi);
                     }
                     else
                     {
                         Intent pi = new Intent(getApplicationContext(), ProfileActivity.class);
+                        pi.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
                         startActivity(pi);
                     }
 
                    return true;
                 case R.id.navigation_contacts:
                     Intent ai = new Intent(getApplicationContext(), ContactActivity.class);
+                    ai.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
                     startActivity(ai);
                     return true;
             }

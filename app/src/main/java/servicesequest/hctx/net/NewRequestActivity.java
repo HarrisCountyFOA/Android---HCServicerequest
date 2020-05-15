@@ -413,6 +413,12 @@ public class NewRequestActivity extends AppCompatActivity {
                     GeocodingResult result = gson.fromJson(
                             results.getString(0), GeocodingResult.class);
 
+                    if(result.formatted_address != null)
+                    {
+                        runSearch = false;
+                        txtView.setText(result.formatted_address);
+                    }
+
                     myLocation = result.geometry.location;
                     AddressCheck();
                     // displayDialog(placePrediction, result);
