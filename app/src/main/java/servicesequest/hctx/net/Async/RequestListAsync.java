@@ -14,6 +14,7 @@ import servicesequest.hctx.net.Model.Request;
 import servicesequest.hctx.net.Model.contact;
 import servicesequest.hctx.net.R;
 
+import static servicesequest.hctx.net.DAL.ContactDataManager.insertUpdateContacts;
 import static servicesequest.hctx.net.Utility.GeocodingLocation.getContacts;
 
 
@@ -50,25 +51,7 @@ public class RequestListAsync extends AsyncTask<Void, Void, List<Request>> {
 
 
         dbHelper = new ServiceRequestDbHelper(_Context);
-
-        ContactDataManager cdatamanager = new ContactDataManager();
-        List<contact> _contactlist = cdatamanager.getAllContacts(dbHelper);
-
-        if(_contactlist.size() == 0) {
-            List<contact> fCon = getContacts();
-            if (fCon != null && fCon.size() > 0) {
-                for (int i = 0; i < fCon.size(); i++) {
-                    contact jCon = (contact) fCon.get(i);
-                    contact dbCon = cdatamanager.getContactByPrecinct(dbHelper, jCon.precinct);
-
-                    if (dbCon._id != null && !dbCon._id.equals("")) {
-                        cdatamanager.updateContact(dbHelper, jCon);
-                    } else {
-                        cdatamanager.insertContact(dbHelper, jCon);
-                    }
-                }
-            }
-        }
+        insertUpdateContacts(dbHelper, _Context, false);
 
         RequestDataManager datamanager = new RequestDataManager();
         _requestlist = datamanager.getAllRequests(dbHelper);

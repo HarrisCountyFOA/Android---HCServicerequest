@@ -122,10 +122,10 @@
             <ImageView
                 android:id="@+id/btnPicture"
                 android:layout_width="match_parent"
-                android:layout_height="175dp"
+                android:layout_height="wrap_content"
                 android:contentDescription="thumbnail"
                 android:padding="10dp"
-                android:scaleType="centerCrop"
+                android:scaleType="centerInside"
                 android:src="@drawable/ic_camera" />
 
 
