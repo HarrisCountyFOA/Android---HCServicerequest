@@ -57,7 +57,6 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 Intent ti = new Intent(getApplicationContext(), MapViewActivity.class);
-                ti.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
                 startActivity(ti);
             }
         });
