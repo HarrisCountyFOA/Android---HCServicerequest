@@ -1,18 +1,29 @@
 package servicesequest.hctx.net;
 
 import androidx.annotation.DrawableRes;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.app.AppCompatDelegate;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.FragmentActivity;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
+import android.widget.Toast;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -21,23 +32,32 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MapStyleOptions;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.util.ArrayList;
+import java.util.List;
 
+import servicesequest.hctx.net.Async.RequestListAsync;
 import servicesequest.hctx.net.DAL.RequestDataManager;
 import servicesequest.hctx.net.DAL.RequestInfoWindowAdapater;
+import servicesequest.hctx.net.DAL.RequestListAdapter;
 import servicesequest.hctx.net.DAL.ServiceRequestDbContract;
 import servicesequest.hctx.net.DAL.ServiceRequestDbHelper;
 import servicesequest.hctx.net.Model.Request;
+import servicesequest.hctx.net.Utility.AppPreferences;
+import servicesequest.hctx.net.Utility.Utils;
 
 public class MapViewActivity extends AppCompatActivity implements OnMapReadyCallback {
 
     private GoogleMap mMap;
     ServiceRequestDbHelper dbHelper;
     Marker previousMarker;
+    BottomNavigationView navigation;
+    AppPreferences _appPrefs;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,8 +66,13 @@ public class MapViewActivity extends AppCompatActivity implements OnMapReadyCall
 
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        getSupportActionBar().setTitle("Haris Helps");
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setDisplayShowTitleEnabled(false);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(false);
+        _appPrefs = new AppPreferences(this, "UserProfile");
+
+        navigation = findViewById(R.id.navigation);
+        navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
+        navigation.getMenu().findItem(R.id.navigation_home).setChecked(true);
 
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
@@ -64,8 +89,52 @@ public class MapViewActivity extends AppCompatActivity implements OnMapReadyCall
                 startActivity(ti);
             }
         });
+
+        FloatingActionButton btnAdd = findViewById(R.id.btnAdd);
+        btnAdd.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent ti = new Intent(getApplicationContext(), NewRequestActivity.class);
+                startActivityForResult(ti, 1);
+            }
+        });
     }
 
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (resultCode == Activity.RESULT_OK) {
+            LoadData();
+        }
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.mapmenu, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Change the map type based on the user's selection.
+        switch (item.getItemId()) {
+            case R.id.normal_map:
+                mMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
+                return true;
+            case R.id.hybrid_map:
+                mMap.setMapType(GoogleMap.MAP_TYPE_HYBRID);
+                return true;
+            case R.id.satellite_map:
+                mMap.setMapType(GoogleMap.MAP_TYPE_SATELLITE);
+                return true;
+            case R.id.terrain_map:
+                mMap.setMapType(GoogleMap.MAP_TYPE_TERRAIN);
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
 
     /**
      * Manipulates the map once available.
@@ -79,7 +148,6 @@ public class MapViewActivity extends AppCompatActivity implements OnMapReadyCall
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
-
         mMap.setInfoWindowAdapter(new RequestInfoWindowAdapater(MapViewActivity.this));
         mMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
             @Override
@@ -107,24 +175,89 @@ public class MapViewActivity extends AppCompatActivity implements OnMapReadyCall
             }
         });
 
-        dbHelper = new ServiceRequestDbHelper(this);
-        RequestDataManager datamanager = new RequestDataManager();
-        ArrayList<Request> requests = datamanager.getAllRequests(dbHelper);
-
-        final int size = requests.size();
-        for (int i = 0; i < size; i++) {
-            Request R1 = requests.get(i);
-
-            LatLng l = new LatLng(Double.parseDouble(R1.Latitude), Double.parseDouble(R1.Longitude));
-            Marker mMarker = mMap.addMarker(new MarkerOptions().position(l).title(R1.Image_Name));
-            mMarker.setIcon(bitmapDescriptorFromVector(MapViewActivity.this, R.drawable.ic_request_map_marker));
-            mMarker.setSnippet(R1._id);
-        }
-
-        // Add a marker in Sydney and move the camera
-        LatLng hc = new LatLng(29.8172035, -95.4148001);
-        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(hc, 9.0f));
+        LoadData();
     }
+
+    private void LoadData() {
+        RequestListAsync asyncTask = new RequestListAsync(this, new RequestListAsync.OnTaskCompleted() {
+            @Override
+            public void taskCompleted(List<Request> results) {
+                try {
+                    if (results.size() != 0) {
+                        final int size = results.size();
+                        for (int i = 0; i < size; i++) {
+                            Request R1 = results.get(i);
+
+                            LatLng l = new LatLng(Double.parseDouble(R1.Latitude), Double.parseDouble(R1.Longitude));
+                            Marker mMarker = mMap.addMarker(new MarkerOptions().position(l).title(R1.Image_Name));
+                            mMarker.setIcon(bitmapDescriptorFromVector(MapViewActivity.this, R.drawable.ic_request_map_marker));
+                            mMarker.setSnippet(R1._id);
+
+                            LatLng hc = new LatLng(29.8172035, -95.4148001);
+                            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(hc, 9.0f));
+                        }
+
+                    } else if (results.size() == 0) {
+                        Toast.makeText(getApplicationContext(), "No saved reports", Toast.LENGTH_LONG).show();
+                    }
+                } catch (Exception ex) {
+                    String Info = "There was a problem getting your reports. Please try again later.<br><br>";
+                    Utils.customPopMessge(getApplicationContext(), "Error", Info + ex.getMessage(), "error");
+                }
+            }
+        });
+        asyncTask.execute();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        navigation.getMenu().findItem(R.id.navigation_home).setChecked(true);
+        LoadData();
+    }
+
+    BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener = new BottomNavigationView.OnNavigationItemSelectedListener() {
+
+        @Override
+        public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+            switch (item.getItemId()) {
+                case R.id.navigation_home:
+                    Intent hi = new Intent(getApplicationContext(), MainActivity.class);
+                    hi.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+                    startActivity(hi);
+                    return true;
+                case R.id.navigation_dashboard:
+                    Intent ti = new Intent(getApplicationContext(), TermsOfUseActivity.class);
+                    ti.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+                    startActivity(ti);
+                    return true;
+                case R.id.navigation_notifications:
+
+                    Boolean profileSet = _appPrefs.getBoolean("ProfileSet");
+
+                    if(profileSet)
+                    {
+                        Intent pi = new Intent(getApplicationContext(), ProfileList.class);
+                        pi.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+                        startActivity(pi);
+                    }
+                    else
+                    {
+                        Intent pi = new Intent(getApplicationContext(), ProfileActivity.class);
+                        pi.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+                        startActivity(pi);
+                    }
+
+                    return true;
+                case R.id.navigation_contacts:
+                    Intent ai = new Intent(getApplicationContext(), ContactActivity.class);
+                    ai.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+                    startActivity(ai);
+                    return true;
+            }
+            return false;
+        }
+    };
 
     private BitmapDescriptor bitmapDescriptorFromVector(Context context, @DrawableRes int vectorDrawableResourceId) {
         Drawable background = ContextCompat.getDrawable(context, vectorDrawableResourceId);

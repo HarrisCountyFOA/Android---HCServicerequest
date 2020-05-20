@@ -122,7 +122,7 @@ public class NewRequestActivity extends AppCompatActivity {
 
         getSupportActionBar().setTitle("New Request");
 
-        Places.initialize(getApplicationContext(), "AIzaSyAU4Qza-d8-PJ6rTI8r4k9tcpw1L-7nHAs");
+        Places.initialize(getApplicationContext(), getString(R.string.google_maps_key));
 
         placesClient = Places.createClient(this);
         queue = Volley.newRequestQueue(this);
@@ -393,7 +393,7 @@ public class NewRequestActivity extends AppCompatActivity {
 
     private void geocodePlaceAndDisplay(final AutocompletePrediction placePrediction) {
         // Construct the request URL
-        final String apiKey = "AIzaSyAU4Qza-d8-PJ6rTI8r4k9tcpw1L-7nHAs";
+        final String apiKey = getString(R.string.google_maps_key);
         final String url = "https://maps.googleapis.com/maps/api/geocode/json?place_id=%s&key=%s";
         final String requestURL = String.format(url, placePrediction.getPlaceId(), apiKey);
 

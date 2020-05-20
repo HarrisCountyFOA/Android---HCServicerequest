@@ -32,7 +32,7 @@ public class TermsOfUseActivity extends AppCompatActivity {
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayShowTitleEnabled(false);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(false);
         _appPrefs = new AppPreferences(this, "UserProfile");
         txtTerms = findViewById(R.id.txtTerms);
 

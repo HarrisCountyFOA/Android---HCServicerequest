@@ -58,7 +58,7 @@ public class ProfileList extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayShowTitleEnabled(false);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(false);
         _appPrefs = new AppPreferences(this, "UserProfile");
 
         navigation = findViewById(R.id.navigation);
