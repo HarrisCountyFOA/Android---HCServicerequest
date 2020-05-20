@@ -39,6 +39,7 @@ import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import servicesequest.hctx.net.Async.RequestListAsync;
@@ -58,6 +59,9 @@ public class MapViewActivity extends AppCompatActivity implements OnMapReadyCall
     Marker previousMarker;
     BottomNavigationView navigation;
     AppPreferences _appPrefs;
+    HashMap<String, String> markerLocation;
+    static final float COORDINATE_OFFSET = 0.00002f;
+    int MAX_NUMBER_OF_MARKERS = 5;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -73,6 +77,7 @@ public class MapViewActivity extends AppCompatActivity implements OnMapReadyCall
         navigation = findViewById(R.id.navigation);
         navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
         navigation.getMenu().findItem(R.id.navigation_home).setChecked(true);
+        markerLocation = new HashMap<String, String>();
 
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
@@ -148,72 +153,128 @@ public class MapViewActivity extends AppCompatActivity implements OnMapReadyCall
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
-        mMap.setInfoWindowAdapter(new RequestInfoWindowAdapater(MapViewActivity.this));
-        mMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
-            @Override
-            public boolean onMarkerClick(Marker marker) {
-                if(previousMarker!=null){
-                    previousMarker.setIcon(bitmapDescriptorFromVector(MapViewActivity.this, R.drawable.ic_request_map_marker));
-                }
-                marker.setIcon(bitmapDescriptorFromVector(MapViewActivity.this, R.drawable.ic_request_map_marker_active));
-                previousMarker = marker;
-                return false;
-            }
-        });
-
-        mMap.setOnInfoWindowClickListener(new GoogleMap.OnInfoWindowClickListener() {
-            @Override
-            public void onInfoWindowClick(Marker marker) {
-
-                Intent ai = new Intent(getApplicationContext(), RequestDetailsActivity.class);
-                String id = marker.getSnippet();
-
-                if (id != null && !id.equals("")) {
-                    ai.putExtra(ServiceRequestDbContract.RequestEntry.COLUMN_REPORTS_ID, id);
-                }
-                startActivity(ai);
-            }
-        });
-
         LoadData();
     }
 
     private void LoadData() {
-        RequestListAsync asyncTask = new RequestListAsync(this, new RequestListAsync.OnTaskCompleted() {
-            @Override
-            public void taskCompleted(List<Request> results) {
-                try {
-                    if (results.size() != 0) {
-                        final int size = results.size();
-                        for (int i = 0; i < size; i++) {
-                            Request R1 = results.get(i);
+       if(mMap != null) {
+           mMap.clear();
+           markerLocation.clear();
 
-                            LatLng l = new LatLng(Double.parseDouble(R1.Latitude), Double.parseDouble(R1.Longitude));
-                            Marker mMarker = mMap.addMarker(new MarkerOptions().position(l).title(R1.Image_Name));
-                            mMarker.setIcon(bitmapDescriptorFromVector(MapViewActivity.this, R.drawable.ic_request_map_marker));
-                            mMarker.setSnippet(R1._id);
+           RequestListAsync asyncTask = new RequestListAsync(this, new RequestListAsync.OnTaskCompleted() {
+               @Override
+               public void taskCompleted(List<Request> results) {
+                   try {
 
-                            LatLng hc = new LatLng(29.8172035, -95.4148001);
-                            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(hc, 9.0f));
-                        }
+                       mMap.setInfoWindowAdapter(new RequestInfoWindowAdapater(MapViewActivity.this));
+                       mMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
+                           @Override
+                           public boolean onMarkerClick(Marker marker) {
+                               if (previousMarker != null) {
+                                   previousMarker.setIcon(bitmapDescriptorFromVector(MapViewActivity.this, R.drawable.ic_request_map_marker));
+                               }
+                               marker.setIcon(bitmapDescriptorFromVector(MapViewActivity.this, R.drawable.ic_request_map_marker_active));
+                               previousMarker = marker;
+                               return false;
+                           }
+                       });
 
-                    } else if (results.size() == 0) {
-                        Toast.makeText(getApplicationContext(), "No saved reports", Toast.LENGTH_LONG).show();
-                    }
-                } catch (Exception ex) {
-                    String Info = "There was a problem getting your reports. Please try again later.<br><br>";
-                    Utils.customPopMessge(getApplicationContext(), "Error", Info + ex.getMessage(), "error");
-                }
-            }
-        });
-        asyncTask.execute();
+                       mMap.setOnInfoWindowClickListener(new GoogleMap.OnInfoWindowClickListener() {
+                           @Override
+                           public void onInfoWindowClick(Marker marker) {
+
+                               Intent ai = new Intent(getApplicationContext(), RequestDetailsActivity.class);
+                               String id = marker.getSnippet();
+
+                               if (id != null && !id.equals("")) {
+                                   ai.putExtra(ServiceRequestDbContract.RequestEntry.COLUMN_REPORTS_ID, id);
+                               }
+                               startActivity(ai);
+                           }
+                       });
+
+                       if (results.size() != 0) {
+                           final int size = results.size();
+                           for (int i = 0; i < size; i++) {
+                               Request R1 = results.get(i);
+
+                               String[] mark = coordinateForMarker(Double.parseDouble(R1.Latitude), Double.parseDouble(R1.Longitude));
+
+                               if (mark != null && mark.length > 0) {
+                                   LatLng l = new LatLng(Double.parseDouble(mark[0]), Double.parseDouble(mark[1]));
+
+                                   Marker mMarker = mMap.addMarker(new MarkerOptions().position(l).title(R1.Image_Name));
+                                   mMarker.setIcon(bitmapDescriptorFromVector(MapViewActivity.this, R.drawable.ic_request_map_marker));
+                                   mMarker.setSnippet(R1._id);
+                                   markerLocation.put(mark[0], mark[0] + "," + mark[1]);
+                               }
+                           }
+
+                       } else if (results.size() == 0) {
+                           Toast.makeText(getApplicationContext(), "No saved reports", Toast.LENGTH_LONG).show();
+                       }
+
+                       LatLng hc = new LatLng(29.8172035, -95.4148001);
+                       mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(hc, 9.0f));
+
+                   } catch (Exception ex) {
+                       String Info = "There was a problem getting your reports. Please try again later.<br><br>";
+                       Utils.customPopMessge(getApplicationContext(), "Error", Info + ex.getMessage(), "error");
+                   }
+               }
+           });
+           asyncTask.execute();
+       }
     }
+
+    private String[] coordinateForMarker(double latitude, double longitude) {
+
+        String[] location = new String[2];
+        location[0] = latitude + "";
+        location[1] = longitude + "";
+
+        for (int i = 0; i <= MAX_NUMBER_OF_MARKERS; i++) {
+
+            if (mapAlreadyHasMarkerForLocation((latitude + i
+                    * COORDINATE_OFFSET)
+                    + "," + (longitude + i * COORDINATE_OFFSET))) {
+
+                // If i = 0 then below if condition is same as upper one. Hence, no need to execute below if condition.
+                if (i == 0)
+                    continue;
+
+                if (mapAlreadyHasMarkerForLocation((latitude - i
+                        * COORDINATE_OFFSET)
+                        + "," + (longitude - i * COORDINATE_OFFSET))) {
+
+                    continue;
+
+                } else {
+                    location[0] = latitude - (i * COORDINATE_OFFSET) + "";
+                    location[1] = longitude - (i * COORDINATE_OFFSET) + "";
+                    break;
+                }
+
+            } else {
+                location[0] = latitude + (i * COORDINATE_OFFSET) + "";
+                location[1] = longitude + (i * COORDINATE_OFFSET) + "";
+                break;
+            }
+        }
+
+        return location;
+    }
+
+    private boolean mapAlreadyHasMarkerForLocation(String location) {
+        return (markerLocation.containsValue(location));
+    }
+
 
     @Override
     protected void onResume() {
         super.onResume();
         navigation.getMenu().findItem(R.id.navigation_home).setChecked(true);
-        LoadData();
+       // LoadData();
     }
 
     BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener = new BottomNavigationView.OnNavigationItemSelectedListener() {
@@ -235,14 +296,11 @@ public class MapViewActivity extends AppCompatActivity implements OnMapReadyCall
 
                     Boolean profileSet = _appPrefs.getBoolean("ProfileSet");
 
-                    if(profileSet)
-                    {
+                    if (profileSet) {
                         Intent pi = new Intent(getApplicationContext(), ProfileList.class);
                         pi.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
                         startActivity(pi);
-                    }
-                    else
-                    {
+                    } else {
                         Intent pi = new Intent(getApplicationContext(), ProfileActivity.class);
                         pi.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
                         startActivity(pi);
