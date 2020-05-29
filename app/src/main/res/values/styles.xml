@@ -1,6 +1,8 @@
 <resources>
 
-
+    <style name="AppTheme.Launcher">
+        <item name="android:windowBackground">@drawable/layout_launcher</item>
+    </style>
 
     <style name="TextLabel" parent="TextAppearance.Design.Hint">
         <item name="android:textSize">16sp</item>
