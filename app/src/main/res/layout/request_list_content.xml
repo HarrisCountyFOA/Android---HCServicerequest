@@ -20,13 +20,13 @@
         <ImageView
             android:id="@+id/avatar"
             android:layout_width="0dp"
-            android:layout_height="175dp"
+            android:layout_height="wrap_content"
             android:contentDescription="thumbnail"
-            android:scaleType="centerCrop"
+            android:scaleType="fitXY"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:srcCompat="@android:drawable/ic_menu_camera" />
+            />
 
         <TextView
             android:id="@+id/txvName"

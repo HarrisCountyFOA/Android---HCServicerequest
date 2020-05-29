@@ -70,6 +70,7 @@ import servicesequest.hctx.net.Model.GeocodingResult;
 import servicesequest.hctx.net.Model.RequestTypeSelectSet;
 import servicesequest.hctx.net.Model.RequestTypeSet;
 import servicesequest.hctx.net.Model.contact;
+import servicesequest.hctx.net.Utility.ImagePicker;
 import servicesequest.hctx.net.Utility.Utils;
 
 
@@ -163,7 +164,7 @@ public class NewRequestActivity extends AppCompatActivity {
             public void onClick(View v) {
 
                 if (txtAddPhoto.getText().toString().equals("Add Photo")) {
-                    selectImage();
+                    ImagePicker.pickImage(NewRequestActivity.this, "Select your image:");
                 } else {
                     imageSet = false;
                     btnPicture.setVisibility(View.GONE);
@@ -311,25 +312,39 @@ public class NewRequestActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent imageReturnedIntent) {
         super.onActivityResult(requestCode, resultCode, imageReturnedIntent);
 
-        switch (requestCode) {
-            case 0:
-                if (resultCode == RESULT_OK) {
-                    Bitmap photo = (Bitmap) imageReturnedIntent.getExtras().get("data");
-                    btnPicture.setImageBitmap(photo);
-                }
+//        switch (requestCode) {
+//            case 0:
+//                if (resultCode == RESULT_OK) {
+//                    Bitmap photo = (Bitmap) imageReturnedIntent.getExtras().get("data");
+//                    ByteArrayOutputStream bos = new ByteArrayOutputStream();
+//                    photo.compress(Bitmap.CompressFormat.JPEG, 100, bos);
+//
+//                    int width = photo.getWidth();
+//                    int Height = photo.getHeight();
+//
+//                    btnPicture.setImageBitmap(photo);
+//                }
+//
+//                break;
+//            case 2:
+//                if (resultCode == RESULT_OK) {
+//                    Uri selectedImage = imageReturnedIntent.getData();
+//                    btnPicture.setImageURI(selectedImage);
+//                }
+//                break;
+//        }
 
-                break;
-            case 2:
-                if (resultCode == RESULT_OK) {
-                    Uri selectedImage = imageReturnedIntent.getData();
-                    btnPicture.setImageURI(selectedImage);
-                }
-                break;
+        Bitmap bitmap = ImagePicker.getImageFromResult(NewRequestActivity.this, requestCode, resultCode, imageReturnedIntent);
+        if (bitmap != null) {
+            ByteArrayOutputStream bos = new ByteArrayOutputStream();
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, bos);
+
+            btnPicture.setImageBitmap(bitmap);
+
+            btnPicture.setVisibility(View.VISIBLE);
+            txtAddPhoto.setText("Remove Photo");
+            imageSet = true;
         }
-
-        btnPicture.setVisibility(View.VISIBLE);
-        txtAddPhoto.setText("Remove Photo");
-        imageSet = true;
     }
 
 

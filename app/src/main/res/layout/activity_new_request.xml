@@ -122,11 +122,11 @@
             <ImageView
                 android:id="@+id/btnPicture"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="600dp"
                 android:contentDescription="thumbnail"
                 android:padding="10dp"
-                android:scaleType="centerInside"
-                android:src="@drawable/ic_camera" />
+                android:scaleType="fitXY"
+               />
 
 
             <androidx.cardview.widget.CardView
