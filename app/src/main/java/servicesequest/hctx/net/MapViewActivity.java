@@ -1,20 +1,8 @@
 package servicesequest.hctx.net;
 
-import androidx.annotation.DrawableRes;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.app.AppCompatDelegate;
-import androidx.appcompat.widget.Toolbar;
-import androidx.core.content.ContextCompat;
-import androidx.fragment.app.FragmentActivity;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
@@ -25,6 +13,13 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
 
+import androidx.annotation.DrawableRes;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
+import androidx.core.content.ContextCompat;
+
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -32,20 +27,16 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.MapStyleOptions;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
 import servicesequest.hctx.net.Async.RequestListAsync;
-import servicesequest.hctx.net.DAL.RequestDataManager;
 import servicesequest.hctx.net.DAL.RequestInfoWindowAdapater;
-import servicesequest.hctx.net.DAL.RequestListAdapter;
 import servicesequest.hctx.net.DAL.ServiceRequestDbContract;
 import servicesequest.hctx.net.DAL.ServiceRequestDbHelper;
 import servicesequest.hctx.net.Model.Request;
@@ -62,6 +53,7 @@ public class MapViewActivity extends AppCompatActivity implements OnMapReadyCall
     HashMap<String, String> markerLocation;
     static final float COORDINATE_OFFSET = 0.00002f;
     int MAX_NUMBER_OF_MARKERS = 5;
+    boolean loadData = true;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -110,6 +102,7 @@ public class MapViewActivity extends AppCompatActivity implements OnMapReadyCall
         super.onActivityResult(requestCode, resultCode, data);
         if (resultCode == Activity.RESULT_OK) {
             LoadData();
+            loadData = false;
         }
     }
 
@@ -153,78 +146,78 @@ public class MapViewActivity extends AppCompatActivity implements OnMapReadyCall
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
+
+        mMap.setInfoWindowAdapter(new RequestInfoWindowAdapater(MapViewActivity.this));
+        mMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
+            @Override
+            public boolean onMarkerClick(Marker marker) {
+                if (previousMarker != null) {
+                    previousMarker.setIcon(bitmapDescriptorFromVector(MapViewActivity.this, R.drawable.ic_request_map_marker));
+                }
+                marker.setIcon(bitmapDescriptorFromVector(MapViewActivity.this, R.drawable.ic_request_map_marker_active));
+                previousMarker = marker;
+                return false;
+            }
+        });
+
+        mMap.setOnInfoWindowClickListener(new GoogleMap.OnInfoWindowClickListener() {
+            @Override
+            public void onInfoWindowClick(Marker marker) {
+
+                Intent ai = new Intent(getApplicationContext(), RequestDetailsActivity.class);
+                String id = marker.getSnippet();
+
+                if (id != null && !id.equals("")) {
+                    ai.putExtra(ServiceRequestDbContract.RequestEntry.COLUMN_REPORTS_ID, id);
+                }
+                startActivity(ai);
+            }
+        });
+
         LoadData();
     }
 
     private void LoadData() {
-       if(mMap != null) {
-           mMap.clear();
-           markerLocation.clear();
+        if (mMap != null && loadData) {
+            RequestListAsync asyncTask = new RequestListAsync(this, new RequestListAsync.OnTaskCompleted() {
+                @Override
+                public void taskCompleted(List<Request> results) {
+                    try {
+                        if (results.size() != 0) {
+                            final int size = results.size();
+                            for (int i = 0; i < size; i++) {
+                                Request R1 = results.get(i);
 
-           RequestListAsync asyncTask = new RequestListAsync(this, new RequestListAsync.OnTaskCompleted() {
-               @Override
-               public void taskCompleted(List<Request> results) {
-                   try {
+                                if (!markerLocation.containsKey(R1._id)) {
+                                    String[] mark = coordinateForMarker(Double.parseDouble(R1.Latitude), Double.parseDouble(R1.Longitude));
 
-                       mMap.setInfoWindowAdapter(new RequestInfoWindowAdapater(MapViewActivity.this));
-                       mMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
-                           @Override
-                           public boolean onMarkerClick(Marker marker) {
-                               if (previousMarker != null) {
-                                   previousMarker.setIcon(bitmapDescriptorFromVector(MapViewActivity.this, R.drawable.ic_request_map_marker));
-                               }
-                               marker.setIcon(bitmapDescriptorFromVector(MapViewActivity.this, R.drawable.ic_request_map_marker_active));
-                               previousMarker = marker;
-                               return false;
-                           }
-                       });
+                                    if (mark != null && mark.length > 0) {
+                                        LatLng l = new LatLng(Double.parseDouble(mark[0]), Double.parseDouble(mark[1]));
 
-                       mMap.setOnInfoWindowClickListener(new GoogleMap.OnInfoWindowClickListener() {
-                           @Override
-                           public void onInfoWindowClick(Marker marker) {
+                                        Marker mMarker = mMap.addMarker(new MarkerOptions().position(l).title(R1.Image_Name));
+                                        mMarker.setIcon(bitmapDescriptorFromVector(MapViewActivity.this, R.drawable.ic_request_map_marker));
+                                        mMarker.setSnippet(R1._id);
+                                        markerLocation.put(R1._id, mark[0] + "," + mark[1]);
+                                    }
+                                }
+                            }
 
-                               Intent ai = new Intent(getApplicationContext(), RequestDetailsActivity.class);
-                               String id = marker.getSnippet();
+                        } else if (results.size() == 0) {
+                            Toast.makeText(getApplicationContext(), "No saved reports", Toast.LENGTH_LONG).show();
+                        }
 
-                               if (id != null && !id.equals("")) {
-                                   ai.putExtra(ServiceRequestDbContract.RequestEntry.COLUMN_REPORTS_ID, id);
-                               }
-                               startActivity(ai);
-                           }
-                       });
+                        LatLng hc = new LatLng(29.8172035, -95.4148001);
+                        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(hc, 9.0f));
 
-                       if (results.size() != 0) {
-                           final int size = results.size();
-                           for (int i = 0; i < size; i++) {
-                               Request R1 = results.get(i);
-
-                               String[] mark = coordinateForMarker(Double.parseDouble(R1.Latitude), Double.parseDouble(R1.Longitude));
-
-                               if (mark != null && mark.length > 0) {
-                                   LatLng l = new LatLng(Double.parseDouble(mark[0]), Double.parseDouble(mark[1]));
-
-                                   Marker mMarker = mMap.addMarker(new MarkerOptions().position(l).title(R1.Image_Name));
-                                   mMarker.setIcon(bitmapDescriptorFromVector(MapViewActivity.this, R.drawable.ic_request_map_marker));
-                                   mMarker.setSnippet(R1._id);
-                                   markerLocation.put(mark[0], mark[0] + "," + mark[1]);
-                               }
-                           }
-
-                       } else if (results.size() == 0) {
-                           Toast.makeText(getApplicationContext(), "No saved reports", Toast.LENGTH_LONG).show();
-                       }
-
-                       LatLng hc = new LatLng(29.8172035, -95.4148001);
-                       mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(hc, 9.0f));
-
-                   } catch (Exception ex) {
-                       String Info = "There was a problem getting your reports. Please try again later.<br><br>";
-                       Utils.customPopMessge(getApplicationContext(), "Error", Info + ex.getMessage(), "error");
-                   }
-               }
-           });
-           asyncTask.execute();
-       }
+                    } catch (Exception ex) {
+                        String Info = "There was a problem getting your reports. Please try again later.<br><br>";
+                        Utils.customPopMessge(getApplicationContext(), "Error", Info + ex.getMessage(), "error");
+                    }
+                }
+            });
+            asyncTask.execute();
+        }
+        loadData = true;
     }
 
     private String[] coordinateForMarker(double latitude, double longitude) {
@@ -274,7 +267,7 @@ public class MapViewActivity extends AppCompatActivity implements OnMapReadyCall
     protected void onResume() {
         super.onResume();
         navigation.getMenu().findItem(R.id.navigation_home).setChecked(true);
-       // LoadData();
+        LoadData();
     }
 
     BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener = new BottomNavigationView.OnNavigationItemSelectedListener() {

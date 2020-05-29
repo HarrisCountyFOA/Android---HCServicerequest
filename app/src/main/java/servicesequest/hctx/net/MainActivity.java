@@ -5,12 +5,16 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Button;
+import android.widget.FrameLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -19,13 +23,9 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.util.List;
 
-import servicesequest.hctx.net.Async.ProfileListAsync;
 import servicesequest.hctx.net.Async.RequestListAsync;
-import servicesequest.hctx.net.DAL.ProfileDataManager;
 import servicesequest.hctx.net.DAL.RequestListAdapter;
 import servicesequest.hctx.net.DAL.ServiceRequestDbContract;
-import servicesequest.hctx.net.DAL.ServiceRequestDbHelper;
-import servicesequest.hctx.net.Model.Profile;
 import servicesequest.hctx.net.Model.Request;
 import servicesequest.hctx.net.Utility.AppPreferences;
 import servicesequest.hctx.net.Utility.Utils;
@@ -35,6 +35,14 @@ public class MainActivity extends AppCompatActivity {
     Toolbar toolbar;
     BottomNavigationView navigation;
     AppPreferences _appPrefs;
+    FrameLayout frameLayout;
+    ConstraintLayout consLayout;
+    FloatingActionButton btnMap;
+    FloatingActionButton btnAdd;
+    Button btnEditProfile;
+    Button btnNewRequest;
+    TextView textView;
+    TextView txtNoReports;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,6 +53,12 @@ public class MainActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayShowTitleEnabled(false);
         _appPrefs = new AppPreferences(this, "UserProfile");
+        frameLayout = findViewById(R.id.frameLayout);
+        consLayout = findViewById(R.id.consLayout);
+        btnEditProfile = findViewById(R.id.btnEditProfile);
+        btnNewRequest = findViewById(R.id.btnNewRequest);
+        textView = findViewById(R.id.textView);
+        txtNoReports = findViewById(R.id.txtNoReports);
 
         LoadData();
 
@@ -52,16 +66,17 @@ public class MainActivity extends AppCompatActivity {
         navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
         navigation.getMenu().findItem(R.id.navigation_home).setChecked(true);
 
-        FloatingActionButton btnMap = findViewById(R.id.btnMap);
+        btnMap = findViewById(R.id.btnMap);
         btnMap.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 Intent ti = new Intent(getApplicationContext(), MapViewActivity.class);
+                ti.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
                 startActivity(ti);
             }
         });
 
-        FloatingActionButton btnAdd = findViewById(R.id.btnAdd);
+        btnAdd = findViewById(R.id.btnAdd);
         btnAdd.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -70,6 +85,26 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        btnEditProfile.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String profileId = _appPrefs.getString("ProfileId");
+
+                Intent pi = new Intent(getApplicationContext(), ProfileActivity.class);
+                if (!profileId.equals("")) {
+                    pi.putExtra(ServiceRequestDbContract.ProfileEntry.COLUMN_ID, profileId);
+                }
+                startActivity(pi);
+            }
+        });
+
+        btnNewRequest.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent pi = new Intent(getApplicationContext(), NewRequestActivity.class);
+                startActivity(pi);
+            }
+        });
     }
 
     private void LoadData() {
@@ -96,9 +131,36 @@ public class MainActivity extends AppCompatActivity {
                         manager.setOrientation(RecyclerView.VERTICAL);
 
                         vi.setLayoutManager(manager);
-                    } else if (results.size() == 0) {
-                        Toast.makeText(getApplicationContext(), "No saved reports", Toast.LENGTH_LONG).show();
                     }
+
+                    Boolean profileSet = _appPrefs.getBoolean("ProfileSet");
+                    if (!profileSet || results.size() == 0) {
+                        consLayout.setVisibility(View.VISIBLE);
+                        frameLayout.setVisibility(View.GONE);
+                        btnMap.setVisibility(View.GONE);
+                        btnAdd.setVisibility(View.GONE);
+                        getSupportActionBar().hide();
+
+                        if (results.size() == 0 && profileSet) {
+                            btnNewRequest.setVisibility(View.VISIBLE);
+                            textView.setVisibility(View.GONE);
+                            txtNoReports.setText(getString(R.string.no_request_have_been_submitted));
+                            btnEditProfile.setText(getString(R.string.edit_profile));
+                        } else {
+                            btnNewRequest.setVisibility(View.GONE);
+                            textView.setVisibility(View.VISIBLE);
+                            txtNoReports.setText("");
+                            btnEditProfile.setText(getString(R.string.create_profile));
+                        }
+
+                    } else {
+                        consLayout.setVisibility(View.GONE);
+                        frameLayout.setVisibility(View.VISIBLE);
+                        btnMap.setVisibility(View.VISIBLE);
+                        btnAdd.setVisibility(View.VISIBLE);
+                        getSupportActionBar().show();
+                    }
+
                 } catch (Exception ex) {
                     String Info = "There was a problem getting your reports. Please try again later.<br><br>";
                     Utils.customPopMessge(getApplicationContext(), "Error", Info + ex.getMessage(), "error");
@@ -129,9 +191,9 @@ public class MainActivity extends AppCompatActivity {
         public boolean onNavigationItemSelected(@NonNull MenuItem item) {
             switch (item.getItemId()) {
                 case R.id.navigation_home:
-                        Intent hi = new Intent(getApplicationContext(), MainActivity.class);
-                        hi.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
-                        startActivity(hi);
+                    Intent hi = new Intent(getApplicationContext(), MainActivity.class);
+                    hi.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+                    startActivity(hi);
                     return true;
                 case R.id.navigation_dashboard:
                     Intent ti = new Intent(getApplicationContext(), TermsOfUseActivity.class);
@@ -142,20 +204,17 @@ public class MainActivity extends AppCompatActivity {
 
                     Boolean profileSet = _appPrefs.getBoolean("ProfileSet");
 
-                    if(profileSet)
-                    {
+                    if (profileSet) {
                         Intent pi = new Intent(getApplicationContext(), ProfileList.class);
                         pi.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
                         startActivity(pi);
-                    }
-                    else
-                    {
+                    } else {
                         Intent pi = new Intent(getApplicationContext(), ProfileActivity.class);
                         pi.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
                         startActivity(pi);
                     }
 
-                   return true;
+                    return true;
                 case R.id.navigation_contacts:
                     Intent ai = new Intent(getApplicationContext(), ContactActivity.class);
                     ai.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);

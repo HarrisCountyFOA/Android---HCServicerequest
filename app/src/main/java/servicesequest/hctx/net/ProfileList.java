@@ -226,6 +226,7 @@ public class ProfileList extends AppCompatActivity {
                         }
 
                         profileId = p._id;
+                        _appPrefs.putString("ProfileId", profileId);
                         if (p.commContact != null && p.commContact._id != null && !p.commContact._id.trim().equals("")) {
                             contact comContact = p.commContact;
                             text2.setText(comContact.firstname);
