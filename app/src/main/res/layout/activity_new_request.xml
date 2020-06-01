@@ -208,7 +208,7 @@
                 android:drawableLeft="@drawable/ic_camera"
                 android:drawablePadding="10dp"
                 android:paddingLeft="0dp"
-                android:text="@string/AddUpdate" />
+                android:text="@string/PhotoTitleAdd" />
 
             <RelativeLayout
                 android:id="@+id/imagePreview"

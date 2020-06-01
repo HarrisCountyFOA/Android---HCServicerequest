@@ -2,6 +2,7 @@ package servicesequest.hctx.net;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.view.MenuItem;
 import android.view.View;
@@ -15,6 +16,7 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.core.app.ActivityCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -27,6 +29,7 @@ import servicesequest.hctx.net.Async.RequestListAsync;
 import servicesequest.hctx.net.DAL.RequestListAdapter;
 import servicesequest.hctx.net.DAL.ServiceRequestDbContract;
 import servicesequest.hctx.net.Model.Request;
+import servicesequest.hctx.net.Utility.AppPermission;
 import servicesequest.hctx.net.Utility.AppPreferences;
 import servicesequest.hctx.net.Utility.Utils;
 
@@ -81,8 +84,14 @@ public class MainActivity extends AppCompatActivity {
         btnAdd.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent ti = new Intent(getApplicationContext(), NewRequestActivity.class);
-                startActivityForResult(ti, 1);
+
+
+                if (AppPermission.checkLocationPermission(MainActivity.this)) {
+                    Intent ti = new Intent(getApplicationContext(), NewRequestActivity.class);
+                    startActivityForResult(ti, 1);
+                }
+
+
             }
         });
 
@@ -102,8 +111,11 @@ public class MainActivity extends AppCompatActivity {
         btnNewRequest.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent pi = new Intent(getApplicationContext(), NewRequestActivity.class);
-                startActivity(pi);
+
+                if (AppPermission.checkLocationPermission(MainActivity.this)) {
+                    Intent pi = new Intent(getApplicationContext(), NewRequestActivity.class);
+                    startActivity(pi);
+                }
             }
         });
     }
@@ -226,4 +238,20 @@ public class MainActivity extends AppCompatActivity {
         }
     };
 
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        for(String permission: permissions){
+            if(ActivityCompat.shouldShowRequestPermissionRationale(MainActivity.this, permission)){
+                Toast.makeText(MainActivity.this, R.string.requestPermissions, Toast.LENGTH_LONG).show();
+                //Log.e("denied", permission);  //denied
+            }else{
+                if(ActivityCompat.checkSelfPermission((MainActivity.this), permission) == PackageManager.PERMISSION_GRANTED){
+                    //Log.e("allowed", permission); //allowed
+                } else{
+                    //Log.e("set to never ask again", permission); //set to never ask again
+                    Toast.makeText(MainActivity.this, R.string.requestPermissions, Toast.LENGTH_LONG).show();
+                }
+            }
+        }
+    }
 }
