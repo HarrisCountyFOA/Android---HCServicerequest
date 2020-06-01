@@ -1,9 +1,15 @@
 package servicesequest.hctx.net;
 
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.graphics.Color;
+import android.graphics.Typeface;
 import android.graphics.drawable.BitmapDrawable;
+import android.location.Address;
+import android.location.Geocoder;
 import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
@@ -16,17 +22,24 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.RelativeLayout;
+import android.widget.ScrollView;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ViewAnimator;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.cardview.widget.CardView;
+import androidx.core.app.ActivityCompat;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -37,7 +50,15 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
+import com.google.android.gms.location.LocationListener;
+import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.UiSettings;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
+import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.libraries.places.api.Places;
 import com.google.android.libraries.places.api.model.AutocompletePrediction;
@@ -57,7 +78,9 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.util.List;
+import java.util.Locale;
 
 import servicesequest.hctx.net.Async.NewRequestAsync;
 import servicesequest.hctx.net.DAL.ContactDataManager;
@@ -70,11 +93,14 @@ import servicesequest.hctx.net.Model.GeocodingResult;
 import servicesequest.hctx.net.Model.RequestTypeSelectSet;
 import servicesequest.hctx.net.Model.RequestTypeSet;
 import servicesequest.hctx.net.Model.contact;
+import servicesequest.hctx.net.Utility.AppPermission;
+import servicesequest.hctx.net.Utility.FusedLocationProvider;
+import servicesequest.hctx.net.Utility.GoogleMapWithScrollFix;
 import servicesequest.hctx.net.Utility.ImagePicker;
 import servicesequest.hctx.net.Utility.Utils;
 
 
-public class NewRequestActivity extends AppCompatActivity {
+public class NewRequestActivity extends AppCompatActivity implements LocationListener {
 
     private static final String TAG = NewRequestActivity.class.getSimpleName();
     private Location mGetedLocation;
@@ -116,12 +142,25 @@ public class NewRequestActivity extends AppCompatActivity {
     TextView text8;
     CardView cmView;
 
+    private GoogleMap mMap;
+    boolean mapsearch = false;
+    FusedLocationProvider fusedLocationProvider;
+    InputMethodManager inputManager;
+
+    ImageView imgDescActive,imgTypeActive,imgLocationActive,imgPhotoActive;
+    int selectedItem = -1;
+    public byte[] Bitmap_Image = null;
+    Button btnPictureDelete;
+    RelativeLayout imagePreview;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_new_request);
 
         getSupportActionBar().setTitle("New Request");
+
+        inputManager = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
 
         Places.initialize(getApplicationContext(), getString(R.string.google_maps_key));
 
@@ -137,18 +176,55 @@ public class NewRequestActivity extends AppCompatActivity {
         RequestTypeSet.requestTypeSet.clear();
 
         spinnerRequest = (Spinner) findViewById(R.id.spinnerRequest);
-        spinnerArrayAdapterRequest = new ArrayAdapter<>(this, R.layout.spinner_dropdown_item);
+        spinnerArrayAdapterRequest = new ArrayAdapter<RequestTypeSelectSet>(this, R.layout.style_spinner_layout){
+            @Override
+            public boolean isEnabled(int position) {
+                if (position == 0) {
+                    // Disable the first item from Spinner
+                    // First item will be use for hint
+                    return false;
+                } else {
+                    return true;
+                }
+            }
+
+            @Override
+            public View getDropDownView(int position, View convertView, ViewGroup parent) {
+                View view = super.getDropDownView(position, convertView, parent);
+
+                // If this is the selected item position
+                if (position == selectedItem)
+                    view.setBackgroundColor(Color.LTGRAY);
+                else
+                    view.setBackgroundColor(Color.WHITE);
+
+
+                // Set the hint text color gray/ hide the item in the popup
+                TextView tv = (TextView) view;
+                if (position == 0) {
+                    //tv.setVisibility(View.GONE);
+                    tv.setTextColor(Color.BLACK);
+                    tv.setText(getResources().getString(R.string.TypePopupHint));
+                    tv.setTypeface(null, Typeface.BOLD);
+                    view.setBackgroundColor(Color.LTGRAY);
+                } else {
+                    //tv.setVisibility(View.VISIBLE);
+                    tv.setTextColor(Color.BLACK);
+                    tv.setTypeface(null, Typeface.NORMAL);
+                }
+                return view;
+            }
+        };
         spinnerArrayAdapterRequest.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 
         spinnerArrayAdapterRequest.add(new RequestTypeSelectSet("", ""));
         spinnerRequest.setAdapter(spinnerArrayAdapterRequest);
         spinnerRequest.setSelection(0, false);
+
+
         viewAnimator = findViewById(R.id.view_animator);
         sessionToken = AutocompleteSessionToken.newInstance();
 
-        cmView = findViewById(R.id.cmView);
-        cmView.setVisibility(View.GONE);
-        btnPicture.setVisibility(View.GONE);
 
         text2 = findViewById(R.id.text2);
         text3 = findViewById(R.id.text3);
@@ -158,20 +234,73 @@ public class NewRequestActivity extends AppCompatActivity {
         text7 = findViewById(R.id.text7);
         text8 = findViewById(R.id.text8);
 
+        imgDescActive = findViewById(R.id.imgDescActive);
+        imgTypeActive = findViewById(R.id.imgTypeActive);
+        imgLocationActive = findViewById(R.id.imgLocationActive);
+        imgPhotoActive = findViewById(R.id.imgPhotoActive);
+        btnPictureDelete = findViewById(R.id.btnPictureDelete);
+        imagePreview = findViewById(R.id.imagePreview);
+
+        cmView = findViewById(R.id.cmView);
+        cmView.setVisibility(View.GONE);
+        imagePreview.setVisibility(View.GONE);
+
         initRecyclerView();
         txtAddPhoto.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
 
-                if (txtAddPhoto.getText().toString().equals("Add Photo")) {
-                    ImagePicker.pickImage(NewRequestActivity.this, "Select your image:");
-                } else {
-                    imageSet = false;
-                    btnPicture.setVisibility(View.GONE);
-                    txtAddPhoto.setText("Add Photo");
+                if (AppPermission.checkCameraPermission(NewRequestActivity.this)) {
+                    if (!imageSet) {
+                        ImagePicker.pickImage(NewRequestActivity.this, getResources().getString(R.string.TakePicture));
+                    } else {
+                        final CharSequence[] items = {getResources().getString(R.string.AddUpdate), getResources().getString(R.string.Remove),};
+                        AlertDialog.Builder builder = new AlertDialog.Builder(NewRequestActivity.this);
+                        builder.setTitle(getResources().getString(R.string.PicturePopTitle));
+                        builder.setItems(items, new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int which) {
+
+                                switch (which) {
+                                    case 0: //Add/Update
+                                    {
+                                        ImagePicker.pickImage(NewRequestActivity.this, getResources().getString(R.string.TakePicture));
+                                    }
+                                    case 1: //Remove
+                                    {
+                                        imageSet = false;
+                                        Bitmap_Image = null;
+                                        imagePreview.setVisibility(View.GONE);
+                                        txtAddPhoto.setText(getResources().getString(R.string.PhotoTitleAdd));
+                                        imgPhotoActive.setImageResource(R.drawable.ic_check_circle_silver_24dp);
+                                    }
+                                }
+                            }
+                        });
+                        builder.setNegativeButton(getResources().getString(R.string.PicturePopCancel), new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                dialog.dismiss();
+                            }
+                        });
+
+                        builder.show();
+                    }
                 }
+
             }
         });
+
+        btnPictureDelete.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                imageSet = false;
+                Bitmap_Image = null;
+                imagePreview.setVisibility(View.GONE);
+                txtAddPhoto.setText(getResources().getString(R.string.PhotoTitleAdd));
+                imgPhotoActive.setImageResource(R.drawable.ic_check_circle_silver_24dp);
+            }
+        });
+
 
         spinnerRequest.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
@@ -182,7 +311,19 @@ public class NewRequestActivity extends AppCompatActivity {
                 if (rt != null) {
                     RequestType = rt.key;
                     RequestTypeValue = String.valueOf(rt.value);
+
                 }
+
+                // First item is disable and it is used for hint
+                if(position > 0) {
+                    imgTypeActive.setImageResource(R.drawable.ic_check_circle_green_24dp);
+                    ((TextView) parentView.getChildAt(0)).setTextColor(Color.BLACK);
+                    ((TextView) parentView.getChildAt(0)).setTextSize(18f);
+                }
+                else {
+                    imgTypeActive.setImageResource(R.drawable.ic_check_circle_silver_24dp);
+                }
+                selectedItem = position;
             }
 
             @Override
@@ -191,30 +332,68 @@ public class NewRequestActivity extends AppCompatActivity {
             }
         });
 
-    }
+        //Start a connect for location
+        fusedLocationProvider = new FusedLocationProvider(NewRequestActivity.this, this);
+        fusedLocationProvider.connect();
 
-    private void selectImage() {
-        final CharSequence[] options = {"Take Photo", "Choose from Gallery", "Cancel"};
-        AlertDialog.Builder builder = new AlertDialog.Builder(NewRequestActivity.this);
-        builder.setTitle("Add Photo!");
-        builder.setItems(options, new DialogInterface.OnClickListener() {
+        // Obtain the Custom GoogleMapWithScrollFix and get notified when the map is ready to be used.
+        //So map can work with scroll
+        ((GoogleMapWithScrollFix) getSupportFragmentManager().findFragmentById(R.id.map)).getMapAsync(new OnMapReadyCallback() {
             @Override
-            public void onClick(DialogInterface dialog, int item) {
-                if (options[item].equals("Take Photo")) {
-                    Intent takePicture = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-                    startActivityForResult(takePicture, 0);
-                } else if (options[item].equals("Choose from Gallery")) {
-                    Intent intent = new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-                    intent.setType("image/*");
-                    startActivityForResult(intent, 2);
-                } else if (options[item].equals("Cancel")) {
-                    dialog.dismiss();
-                }
+            public void onMapReady(GoogleMap googleMap) {
+                mMap = googleMap;
+                mMap.getUiSettings().setZoomControlsEnabled(true);
+                mMap.getUiSettings().setCompassEnabled(true);
+
+                final ScrollView mScrollView1 = findViewById(R.id.ScrollView01);
+                ((GoogleMapWithScrollFix) getSupportFragmentManager().findFragmentById(R.id.map)).setListener(new GoogleMapWithScrollFix.OnTouchListener() {
+                    @Override
+                    public void onTouch() {
+                        //Disable scrolling of outside scroll view
+                        mScrollView1.requestDisallowInterceptTouchEvent(true);
+                    }
+                });
             }
         });
-        builder.show();
+
+        txtDescription.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void afterTextChanged(Editable s) {}
+
+            @Override
+            public void beforeTextChanged(CharSequence s, int start,
+                                          int count, int after) {
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                if(s.length() == 0)//gray Icon
+                    imgDescActive.setImageResource(R.drawable.ic_check_circle_silver_24dp);
+                else if (s.length() > 0)//Green Icon
+                    imgDescActive.setImageResource(R.drawable.ic_check_circle_green_24dp);
+
+            }
+        });
     }
 
+
+
+    protected void onActivityResult(int requestCode, int resultCode, Intent imageReturnedIntent) {
+        super.onActivityResult(requestCode, resultCode, imageReturnedIntent);
+
+        Bitmap bitmap = ImagePicker.getImageFromResult(this, requestCode, resultCode, imageReturnedIntent);
+        if (bitmap != null) {
+            ByteArrayOutputStream bos = new ByteArrayOutputStream();
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, bos);
+
+            imgPhotoActive.setImageResource(R.drawable.ic_check_circle_green_24dp);
+            Bitmap_Image = bos.toByteArray();
+            btnPicture.setImageBitmap(bitmap);
+            imagePreview.setVisibility(View.VISIBLE);
+            txtAddPhoto.setText(getResources().getString(R.string.PhotoTitleUpdate));
+            imageSet = true;
+        }
+    }
 
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
@@ -252,10 +431,7 @@ public class NewRequestActivity extends AppCompatActivity {
             servicesequest.hctx.net.Model.Request newReq = new servicesequest.hctx.net.Model.Request();
 
             if (imageSet) {
-                Bitmap bitmap = ((BitmapDrawable) btnPicture.getDrawable()).getBitmap();
-                ByteArrayOutputStream stream = new ByteArrayOutputStream();
-                bitmap.compress(Bitmap.CompressFormat.JPEG, 100, stream);
-                newReq.Image = stream.toByteArray();
+                newReq.Image = Bitmap_Image;
             }
             newReq.Image_Name = RequestType;
             newReq.Latitude = Double.toString(myLocation.latitude);
@@ -274,9 +450,9 @@ public class NewRequestActivity extends AppCompatActivity {
                         setResult(RESULT_OK, new Intent());
                         finish();
 
-                        Toast.makeText(getApplicationContext(), "Request Saved Successfully!!", Toast.LENGTH_LONG).show();
+                        Toast.makeText(getApplicationContext(), getResources().getString(R.string.RequestSuccess), Toast.LENGTH_LONG).show();
                     } else {
-                        Toast.makeText(getApplicationContext(), "Failed to save request. Please try again!!", Toast.LENGTH_LONG).show();
+                        Toast.makeText(getApplicationContext(), getResources().getString(R.string.RequestFailed), Toast.LENGTH_LONG).show();
                     }
                 }
             });
@@ -288,65 +464,26 @@ public class NewRequestActivity extends AppCompatActivity {
 
         boolean results = false;
 
+
         if (txtView.getText().toString().trim().length() == 0) {
-            txtView.setError("Address is required!");
+            txtView.setError(getResources().getString(R.string.ErrAddress));
             results = true;
         } else if (myLocation == null) {
-            txtView.setError("Invalid Address!");
+            txtView.setError(getResources().getString(R.string.ErrAddressInvalid));
             results = true;
         }
 
         if (spinnerRequest.getSelectedItemPosition() <= 0 || RequestType == null || RequestTypeValue == null) {
-            ((TextView) spinnerRequest.getSelectedView()).setError("Request Type is Required.");
+            ((TextView) spinnerRequest.getSelectedView()).setError(getResources().getString(R.string.ErrType));
         }
 
         if (txtDescription.getText().toString().trim().length() == 0) {
-            txtDescription.setError("Description is required!");
+            txtDescription.setError(getResources().getString(R.string.ErrDescription));
             results = true;
         }
 
         return results;
     }
-
-
-    protected void onActivityResult(int requestCode, int resultCode, Intent imageReturnedIntent) {
-        super.onActivityResult(requestCode, resultCode, imageReturnedIntent);
-
-//        switch (requestCode) {
-//            case 0:
-//                if (resultCode == RESULT_OK) {
-//                    Bitmap photo = (Bitmap) imageReturnedIntent.getExtras().get("data");
-//                    ByteArrayOutputStream bos = new ByteArrayOutputStream();
-//                    photo.compress(Bitmap.CompressFormat.JPEG, 100, bos);
-//
-//                    int width = photo.getWidth();
-//                    int Height = photo.getHeight();
-//
-//                    btnPicture.setImageBitmap(photo);
-//                }
-//
-//                break;
-//            case 2:
-//                if (resultCode == RESULT_OK) {
-//                    Uri selectedImage = imageReturnedIntent.getData();
-//                    btnPicture.setImageURI(selectedImage);
-//                }
-//                break;
-//        }
-
-        Bitmap bitmap = ImagePicker.getImageFromResult(NewRequestActivity.this, requestCode, resultCode, imageReturnedIntent);
-        if (bitmap != null) {
-            ByteArrayOutputStream bos = new ByteArrayOutputStream();
-            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, bos);
-
-            btnPicture.setImageBitmap(bitmap);
-
-            btnPicture.setVisibility(View.VISIBLE);
-            txtAddPhoto.setText("Remove Photo");
-            imageSet = true;
-        }
-    }
-
 
     private TextWatcher filterTextWatcher = new TextWatcher() {
         public void afterTextChanged(final Editable s) {
@@ -357,21 +494,34 @@ public class NewRequestActivity extends AppCompatActivity {
                 handler.postDelayed(new Runnable() {
                     @Override
                     public void run() {
-                        myLocation = null;
+                        //myLocation = null; //i will check back later on this - juan.
                         if (!s.toString().equals("")) {
-                            getPlacePredictions(s.toString());
-                            if (viewAnimator.getVisibility() == View.GONE) {
-                                viewAnimator.setVisibility(View.VISIBLE);
+                            if (!mapsearch) {
+                                getPlacePredictions(s.toString());
+
+                                if (viewAnimator.getVisibility() == View.GONE) {
+                                    viewAnimator.setVisibility(View.VISIBLE);
+                                }
+                            }
+                            else
+                            {
+                                if (viewAnimator.getVisibility() == View.VISIBLE) {
+                                    viewAnimator.setVisibility(View.GONE);
+                                }
+                                mapsearch = false;
                             }
                         } else {
+                            RequestTypeSet.requestTypeSet.clear();
                             spinnerArrayAdapterRequest.clear();
-                            spinnerArrayAdapterRequest.add(new RequestTypeSelectSet("", ""));
+                            spinnerArrayAdapterRequest.add(new RequestTypeSelectSet(getResources().getString(R.string.TypeHint), ""));
                             spinnerRequest.setAdapter(spinnerArrayAdapterRequest);
                             spinnerRequest.setSelection(0, false);
 
                             if (viewAnimator.getVisibility() == View.VISIBLE) {
                                 viewAnimator.setVisibility(View.GONE);
                             }
+
+                            cmView.setVisibility(View.GONE);
                         }
                     }
                 }, 300);
@@ -384,6 +534,10 @@ public class NewRequestActivity extends AppCompatActivity {
         }
 
         public void onTextChanged(CharSequence s, int start, int before, int count) {
+            if(s.length() == 0)//gray Icon
+                imgLocationActive.setImageResource(R.drawable.ic_check_circle_silver_24dp);
+            else if (s.length() > 0)//Green Icon
+                imgLocationActive.setImageResource(R.drawable.ic_check_circle_green_24dp);
         }
     };
 
@@ -392,8 +546,7 @@ public class NewRequestActivity extends AppCompatActivity {
         final LinearLayoutManager layoutManager = new LinearLayoutManager(this);
         recyclerView.setLayoutManager(layoutManager);
         recyclerView.setAdapter(adapter);
-        recyclerView
-                .addItemDecoration(new DividerItemDecoration(this, layoutManager.getOrientation()));
+        recyclerView.addItemDecoration(new DividerItemDecoration(this, layoutManager.getOrientation()));
         adapter.setPlaceClickListener(new PlacePredictionAdapter.OnPlaceClickListener() {
             @Override
             public void onPlaceClicked(AutocompletePrediction place) {
@@ -402,11 +555,13 @@ public class NewRequestActivity extends AppCompatActivity {
                 txtView.setText(place.getFullText(null));
                 geocodePlaceAndDisplay(place);
                 viewAnimator.setVisibility(View.GONE);
+                closeKeyboard();
             }
         });
     }
 
     private void geocodePlaceAndDisplay(final AutocompletePrediction placePrediction) {
+
         // Construct the request URL
         final String apiKey = getString(R.string.google_maps_key);
         final String url = "https://maps.googleapis.com/maps/api/geocode/json?place_id=%s&key=%s";
@@ -425,8 +580,7 @@ public class NewRequestActivity extends AppCompatActivity {
                     }
 
                     // Use Gson to convert the response JSON object to a POJO
-                    GeocodingResult result = gson.fromJson(
-                            results.getString(0), GeocodingResult.class);
+                    GeocodingResult result = gson.fromJson(results.getString(0), GeocodingResult.class);
 
                     if(result.formatted_address != null)
                     {
@@ -435,6 +589,7 @@ public class NewRequestActivity extends AppCompatActivity {
                     }
 
                     myLocation = result.geometry.location;
+                    initMap();
                     AddressCheck();
                     // displayDialog(placePrediction, result);
                 } catch (JSONException e) {
@@ -510,21 +665,22 @@ public class NewRequestActivity extends AppCompatActivity {
         RequestTypeAsync asyncTask = new RequestTypeAsync(this, myLocation.latitude, myLocation.longitude, new RequestTypeAsync.OnTaskCompleted() {
             @Override
             public void taskCompleted(Boolean results) {
-
                 spinnerArrayAdapterRequest.clear();
+
+
                 RequestType = null;
                 RequestTypeValue = null;
 
-                spinnerArrayAdapterRequest.add(new RequestTypeSelectSet("", ""));
+                spinnerArrayAdapterRequest.add(new RequestTypeSelectSet(getResources().getString(R.string.TypeHint), ""));
 
                 if (results) {
                     for (RequestTypeSet type : RequestTypeSet.requestTypeSet) {
-
                         spinnerArrayAdapterRequest.add(new RequestTypeSelectSet(type.Category, type.Code));
                     }
 
                     if (!RequestTypeSet.requestTypeSet.get(1).Name.equals(Precinct))
                         RequestTypeValuePosition = 0;
+
 
                     spinnerRequest.setAdapter(spinnerArrayAdapterRequest);
                     spinnerRequest.setSelection(RequestTypeValuePosition, false);
@@ -557,7 +713,7 @@ public class NewRequestActivity extends AppCompatActivity {
                     // SubmitAction = true;
                 } else {
 
-                    Toast.makeText(getApplicationContext(), "You need a Harris County address to submit a services request. ", Toast.LENGTH_LONG).show();
+                    Toast.makeText(getApplicationContext(), getResources().getString(R.string.ErrInvalidHarrisCountyAddress), Toast.LENGTH_LONG).show();
                 }
                 //  txtAddress.setText(FullAddress);
 
@@ -568,6 +724,92 @@ public class NewRequestActivity extends AppCompatActivity {
             }
         });
         asyncTask.execute();
+    }
+
+    ///########Close Key Board
+    private void closeKeyboard() {
+        if (getCurrentFocus() != null)
+            inputManager.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
+    }
+
+    private void initMap()
+    {
+        LatLng hc = new LatLng(myLocation.latitude, myLocation.longitude);
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(hc, 15.0f));
+        mMap.clear();
+        Marker perth = mMap.addMarker(new MarkerOptions().position(hc).draggable(true));
+        MarkerDrag();
+    }
+
+    public void MarkerDrag() {
+        mMap.setOnMarkerDragListener(new GoogleMap.OnMarkerDragListener() {
+            @Override
+            public void onMarkerDragStart(Marker arg0) {
+                // TODO Auto-generated method stub
+                //Log.i("System out", "onMarkerDragStart...");
+            }
+
+            @Override
+            public void onMarkerDragEnd(Marker arg0) {
+                myLocation = arg0.getPosition();
+                getAddress();
+            }
+
+            @Override
+            public void onMarkerDrag(Marker arg0) {
+                // TODO Auto-generated method stub
+                //Log.i("System out", "onMarkerDrag...");
+            }
+        });
+    }
+
+    private void getAddress()
+    {
+        Geocoder gc = new Geocoder(NewRequestActivity.this);
+        List<Address> list = null;
+        try {
+            list = gc.getFromLocation(myLocation.latitude, myLocation.longitude, 1);
+        } catch (IOException e) {
+            e.printStackTrace();
+            return;
+        }
+        Address add = list.get(0);
+        String Address = add.getAddressLine(0);
+
+        txtView.setText(Address);
+        RequestTypeSet.requestTypeSet.clear();
+        AddressCheck();
+        mapsearch = true;
+    }
+
+
+    @Override
+    public void onLocationChanged(Location location) {
+        double currentLatitude = location.getLatitude();
+        double currentLongitude = location.getLongitude();
+        myLocation = new LatLng(currentLatitude, currentLongitude);
+
+        fusedLocationProvider.disconnect();
+        initMap();
+        getAddress();
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        for (String permission : permissions) {
+            if (ActivityCompat.shouldShowRequestPermissionRationale(this, permission)) {
+                Toast.makeText(NewRequestActivity.this, R.string.requestPermissions, Toast.LENGTH_LONG).show();
+                //Log.e("denied", permission);  //denied
+            } else {
+                if (ActivityCompat.checkSelfPermission(this, permission) == PackageManager.PERMISSION_GRANTED) {
+                    //Log.e("allowed", permission); //allowed
+                } else {
+                    //Log.e("set to never ask again", permission); //set to never ask again
+                    //if (permission.equals("android.permission.CAMERA"))
+                    Toast.makeText(NewRequestActivity.this, R.string.requestPermissions, Toast.LENGTH_LONG).show();
+                }
+            }
+        }
     }
 
 }
