@@ -41,34 +41,69 @@
                     android:text="@string/Location" />
             </RelativeLayout >
 
+
+            <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                xmlns:tools="http://schemas.android.com/tools"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                >
             <fragment
                 android:id="@+id/map"
                 android:name="servicesequest.hctx.net.Utility.GoogleMapWithScrollFix"
                 android:layout_width="match_parent"
-                android:layout_height="250dp"
+                android:layout_height="275dp"
                 tools:context=".MapViewActivity" />
 
 
             <com.google.android.material.textfield.TextInputLayout
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="60dp"
                 android:layout_marginBottom="0dp"
                 app:endIconMode="clear_text"
                 app:hintEnabled="false"
-                app:hintTextAppearance="@style/TextLabel">
+                app:hintTextAppearance="@style/TextLabel"
+                android:gravity="bottom"
+                android:layout_margin="10dp"
+                android:textColor="@android:color/black"
+                android:background="@android:color/white"
+                android:id="@+id/txtSearchBox"
+                >
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/place_search"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
+                    android:layout_height="60dp"
                     android:layout_marginStart="0dp"
                     android:layout_marginTop="16dp"
-                    android:layout_marginEnd="8dp"
+                    android:layout_marginEnd="0dp"
                     android:layout_marginBottom="0dp"
+                    android:padding="5dp"
                     android:hint="@string/AddressHint"
-                    android:background="@null"
-                    android:inputType="textMultiLine" />
+                    android:background="@drawable/searchtextbox"
+                    android:inputType="textMultiLine"
+                    />
             </com.google.android.material.textfield.TextInputLayout>
+
+                <ViewAnimator
+                    android:id="@+id/view_animator"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_marginStart="10dp"
+                    android:layout_below="@id/txtSearchBox"
+                    android:layout_marginEnd="10dp"
+
+                    android:background="@android:color/white"
+                    >
+
+                    <androidx.recyclerview.widget.RecyclerView
+
+                        android:id="@+id/places_recycler_view"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        app:layout_behavior="@string/appbar_scrolling_view_behavior"></androidx.recyclerview.widget.RecyclerView>
+                </ViewAnimator>
+
+            </RelativeLayout>
 
             <View
                 android:layout_width="match_parent"
@@ -77,23 +112,6 @@
                 android:layout_marginTop="5dp"
                 android:background="@android:color/darker_gray"/>
 
-            <ViewAnimator
-                android:id="@+id/view_animator"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_marginStart="0dp"
-                android:layout_marginTop="-6dp"
-                android:layout_marginEnd="8dp"
-
-                >
-
-                <androidx.recyclerview.widget.RecyclerView
-
-                    android:id="@+id/places_recycler_view"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    app:layout_behavior="@string/appbar_scrolling_view_behavior"></androidx.recyclerview.widget.RecyclerView>
-            </ViewAnimator>
 
 
 
@@ -215,7 +233,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:orientation="vertical"
-                android:padding="0dp" >
+                android:layout_marginTop="5dp"
+                android:padding="5dp" >
 
                 <ImageView
                     android:id="@+id/btnPicture"
@@ -234,7 +253,7 @@
                     android:layout_marginLeft="0dp"
                     android:layout_marginTop="0dp"
                     android:background="@drawable/ic_close_off_black_24dp"
-                    android:textColor="#fff" />
+                     />
 
             </RelativeLayout>
 
