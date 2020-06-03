@@ -6,6 +6,7 @@ import android.content.Context;
 import android.os.AsyncTask;
 
 import java.util.List;
+import java.util.Random;
 
 import servicesequest.hctx.net.DAL.RequestDataManager;
 import servicesequest.hctx.net.DAL.ServiceRequestDbHelper;
@@ -58,4 +59,5 @@ public class RequestAsync extends AsyncTask<Void, Void, Request> {
         pd.dismiss();
         listener.taskCompleted(results);
     }
+
 }

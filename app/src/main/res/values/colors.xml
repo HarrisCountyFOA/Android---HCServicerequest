@@ -12,4 +12,7 @@
     <color name="ColorPrimaryBackground">#ffffff</color>
     <color name="ColorOnSurface">#F4F4F5</color>
 
+    <color name="TextInputBackground">#ffffff</color>
+    <color name="TextInput">#000000</color>
+
 </resources>

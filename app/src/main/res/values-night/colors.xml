@@ -3,4 +3,8 @@
     <color name="ColorPrimaryBackground">#000000</color>
     <color name="Border">#3D3D41</color>
     <color name="ColorOnSurface">#2C2C30</color>
+
+
+    <color name="TextInputBackground">#000000</color>
+    <color name="TextInput">#ffffff</color>
 </resources>

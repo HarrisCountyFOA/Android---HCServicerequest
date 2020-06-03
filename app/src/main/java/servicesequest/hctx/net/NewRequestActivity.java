@@ -16,6 +16,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.provider.MediaStore;
 import android.text.Editable;
+import android.text.InputType;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.view.Menu;
@@ -23,6 +24,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -149,7 +151,7 @@ public class NewRequestActivity extends AppCompatActivity implements LocationLis
 
     ImageView imgDescActive,imgTypeActive,imgLocationActive,imgPhotoActive;
     int selectedItem = -1;
-    public byte[] Bitmap_Image = null;
+    public byte[] Bitmap_Image;
     Button btnPictureDelete;
     RelativeLayout imagePreview;
 
@@ -166,16 +168,20 @@ public class NewRequestActivity extends AppCompatActivity implements LocationLis
 
         placesClient = Places.createClient(this);
         queue = Volley.newRequestQueue(this);
-        txtView = ((TextInputEditText) findViewById(R.id.place_search));
-        txtDescription = ((TextInputEditText) findViewById(R.id.txtDescription));
+        txtView = findViewById(R.id.place_search);
+        txtDescription =  findViewById(R.id.txtDescription);
         txtView.addTextChangedListener(filterTextWatcher);
-        txtAddPhoto = (TextView) findViewById(R.id.txtAddPhoto);
-        btnPicture = (ImageView) findViewById(R.id.btnPicture);
-        spinnerRequest = (Spinner) findViewById(R.id.spinnerRequest);
+        txtAddPhoto = findViewById(R.id.txtAddPhoto);
+        btnPicture = findViewById(R.id.btnPicture);
+        spinnerRequest = findViewById(R.id.spinnerRequest);
+
+        //Make the keyboard have done using textMultiLine
+        txtDescription.setImeOptions(EditorInfo.IME_ACTION_DONE);
+        txtDescription.setRawInputType(InputType.TYPE_CLASS_TEXT);
 
         RequestTypeSet.requestTypeSet.clear();
 
-        spinnerRequest = (Spinner) findViewById(R.id.spinnerRequest);
+        spinnerRequest = findViewById(R.id.spinnerRequest);
         spinnerArrayAdapterRequest = new ArrayAdapter<RequestTypeSelectSet>(this, R.layout.style_spinner_layout){
             @Override
             public boolean isEnabled(int position) {
@@ -196,26 +202,26 @@ public class NewRequestActivity extends AppCompatActivity implements LocationLis
                 if (position == selectedItem)
                     view.setBackgroundColor(Color.LTGRAY);
                 else
-                    view.setBackgroundColor(Color.WHITE);
+                    view.setBackgroundColor(getResources().getColor(R.color.TextInputBackground));
 
 
                 // Set the hint text color gray/ hide the item in the popup
                 TextView tv = (TextView) view;
                 if (position == 0) {
                     //tv.setVisibility(View.GONE);
-                    tv.setTextColor(Color.BLACK);
+                    tv.setTextColor(getResources().getColor(R.color.TextInput));
                     tv.setText(getResources().getString(R.string.TypePopupHint));
                     tv.setTypeface(null, Typeface.BOLD);
                     view.setBackgroundColor(Color.LTGRAY);
                 } else {
                     //tv.setVisibility(View.VISIBLE);
-                    tv.setTextColor(Color.BLACK);
+                    tv.setTextColor(getResources().getColor(R.color.TextInput));
                     tv.setTypeface(null, Typeface.NORMAL);
                 }
                 return view;
             }
         };
-        spinnerArrayAdapterRequest.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinnerArrayAdapterRequest.setDropDownViewResource(R.layout.style_spinner_dropdown_layout);
 
         spinnerArrayAdapterRequest.add(new RequestTypeSelectSet("", ""));
         spinnerRequest.setAdapter(spinnerArrayAdapterRequest);
@@ -317,7 +323,7 @@ public class NewRequestActivity extends AppCompatActivity implements LocationLis
                 // First item is disable and it is used for hint
                 if(position > 0) {
                     imgTypeActive.setImageResource(R.drawable.ic_check_circle_green_24dp);
-                    ((TextView) parentView.getChildAt(0)).setTextColor(Color.BLACK);
+                    ((TextView) parentView.getChildAt(0)).setTextColor(getResources().getColor(R.color.TextInput));
                     ((TextView) parentView.getChildAt(0)).setTextSize(18f);
                 }
                 else {
@@ -430,9 +436,8 @@ public class NewRequestActivity extends AppCompatActivity implements LocationLis
 
             servicesequest.hctx.net.Model.Request newReq = new servicesequest.hctx.net.Model.Request();
 
-            if (imageSet) {
-                newReq.Image = Bitmap_Image;
-            }
+
+            newReq.Image = Bitmap_Image;
             newReq.Image_Name = RequestType;
             newReq.Latitude = Double.toString(myLocation.latitude);
             newReq.Longitude = Double.toString(myLocation.longitude);

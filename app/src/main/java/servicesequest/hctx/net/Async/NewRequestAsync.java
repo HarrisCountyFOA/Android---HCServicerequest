@@ -4,7 +4,10 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.os.AsyncTask;
 
+import java.util.Random;
+
 import servicesequest.hctx.net.DAL.ProfileDataManager;
+import servicesequest.hctx.net.DAL.PushDataKsoap;
 import servicesequest.hctx.net.DAL.RequestDataManager;
 import servicesequest.hctx.net.DAL.ServiceRequestDbHelper;
 import servicesequest.hctx.net.Model.Profile;
@@ -45,11 +48,23 @@ public class NewRequestAsync extends AsyncTask<Void, Void, Boolean> {
     protected Boolean doInBackground(Void... arg0) {
 
         try {
-            ServiceRequestDbHelper dbHelper = new ServiceRequestDbHelper(_Context);
-            RequestDataManager manager = new RequestDataManager();
 
-            manager.insertRequest(dbHelper, _R);
-            return true;
+           String _UniqueId = UniqueID();
+           Boolean results = new PushDataKsoap().passing(_Context, _R, _UniqueId);
+
+           if (results) {
+               _R._UniqueId = _UniqueId;
+               ServiceRequestDbHelper dbHelper = new ServiceRequestDbHelper(_Context);
+               RequestDataManager manager = new RequestDataManager();
+               manager.insertRequest(dbHelper, _R);
+               dbHelper.close();
+               return true;
+           }
+           else
+           {
+               return false;
+           }
+
         } catch (Exception ex) {
             return false;
         }
@@ -61,5 +76,20 @@ public class NewRequestAsync extends AsyncTask<Void, Void, Boolean> {
         super.onPostExecute(results);
         pd.dismiss();
         listener.taskCompleted(results);
+    }
+
+
+    private String UniqueID()
+    {
+        Random generator = new Random();
+
+        int START = 100000000;
+        int END = 199999999;
+
+        long range = (long)START - (long)END + 1;
+        long fraction = (long)(range * generator.nextDouble());
+        int randomNumber =  (int)(fraction + START);
+
+        return Integer.toString(randomNumber);
     }
 }
