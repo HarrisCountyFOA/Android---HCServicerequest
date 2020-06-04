@@ -6,8 +6,11 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Color;
+import android.graphics.PorterDuff;
 import android.graphics.Typeface;
 import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.Drawable;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
@@ -17,8 +20,12 @@ import android.os.Handler;
 import android.provider.MediaStore;
 import android.text.Editable;
 import android.text.InputType;
+import android.text.Spannable;
+import android.text.SpannableString;
 import android.text.TextWatcher;
+import android.text.style.ForegroundColorSpan;
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -40,6 +47,7 @@ import android.widget.ViewAnimator;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 import androidx.cardview.widget.CardView;
 import androidx.core.app.ActivityCompat;
 import androidx.recyclerview.widget.DividerItemDecoration;
@@ -163,7 +171,16 @@ public class NewRequestActivity extends AppCompatActivity implements LocationLis
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_new_request);
 
+        Toolbar toolbar = findViewById(R.id.action_bar);
+        TextView textView1 = (TextView) toolbar.getChildAt(0);//title
+        textView1.setTextColor(getResources().getColor(R.color.ColorPrimaryText));
+
         getSupportActionBar().setTitle("New Request");
+
+        //Change the back arrow to any color.
+        final Drawable upArrow = getResources().getDrawable(R.drawable.ic_arrow_back_black_24dp);
+        upArrow.setColorFilter(getResources().getColor(R.color.ColorPrimaryText), PorterDuff.Mode.SRC_ATOP);
+        getSupportActionBar().setHomeAsUpIndicator(upArrow);
 
         inputManager = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
 
@@ -407,6 +424,16 @@ public class NewRequestActivity extends AppCompatActivity implements LocationLis
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.newrequest_menu, menu);
+
+        MenuItem mColorFullMenuBtn = menu.findItem(R.id.action_save); // extract the menu item here
+
+        String title = mColorFullMenuBtn.getTitle().toString();
+        if (title != null) {
+            SpannableString s = new SpannableString(title);
+            s.setSpan(new ForegroundColorSpan(getResources().getColor(R.color.ColorPrimaryText)), 0, s.length(), Spannable.SPAN_INCLUSIVE_INCLUSIVE);
+            mColorFullMenuBtn.setTitle(s);
+        }
+
         return true;
     }
 
