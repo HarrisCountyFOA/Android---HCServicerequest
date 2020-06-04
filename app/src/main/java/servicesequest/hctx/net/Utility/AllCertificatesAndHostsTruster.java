@@ -79,7 +79,7 @@ public class AllCertificatesAndHostsTruster implements TrustManager, X509TrustMa
 
 				@Override
 				public boolean verify(String hostname, SSLSession session) {
-					if(hostname.equalsIgnoreCase("www.harriscountytx.gov") || hostname.equalsIgnoreCase("apps.harriscountytx.gov")|| hostname.equalsIgnoreCase("appsqa.harriscountytx.gov")){
+					if(hostname.equalsIgnoreCase("www.harriscountytx.gov") || hostname.equalsIgnoreCase("apps.harriscountytx.gov")|| hostname.equalsIgnoreCase("appsqa.harriscountytx.gov") || hostname.equalsIgnoreCase("maps.googleapis.com")){
 						return true;
 					}else {
 						return false;

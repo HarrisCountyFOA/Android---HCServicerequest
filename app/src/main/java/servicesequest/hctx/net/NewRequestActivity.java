@@ -52,6 +52,7 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
+import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -61,11 +62,13 @@ import com.google.android.gms.maps.UiSettings;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.libraries.places.api.Places;
 import com.google.android.libraries.places.api.model.AutocompletePrediction;
 import com.google.android.libraries.places.api.model.AutocompleteSessionToken;
 import com.google.android.libraries.places.api.model.LocationBias;
+import com.google.android.libraries.places.api.model.Place;
 import com.google.android.libraries.places.api.model.RectangularBounds;
 import com.google.android.libraries.places.api.model.TypeFilter;
 import com.google.android.libraries.places.api.net.FindAutocompletePredictionsRequest;
@@ -452,10 +455,14 @@ public class NewRequestActivity extends AppCompatActivity implements LocationLis
                 @Override
                 public void taskCompleted(Boolean results) {
                     if (results) {
-                        setResult(RESULT_OK, new Intent());
-                        finish();
-
+                       // setResult(RESULT_OK, new Intent());
+                        //finish();
                         Toast.makeText(getApplicationContext(), getResources().getString(R.string.RequestSuccess), Toast.LENGTH_LONG).show();
+
+                        Intent intent = new Intent(NewRequestActivity.this, MainActivity.class);
+                        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                        startActivity(intent);
+
                     } else {
                         Toast.makeText(getApplicationContext(), getResources().getString(R.string.RequestFailed), Toast.LENGTH_LONG).show();
                     }
@@ -499,8 +506,10 @@ public class NewRequestActivity extends AppCompatActivity implements LocationLis
                 handler.postDelayed(new Runnable() {
                     @Override
                     public void run() {
+
                         //myLocation = null; //i will check back later on this - juan.
                         if (!s.toString().equals("")) {
+
                             if (!mapsearch) {
                                 getPlacePredictions(s.toString());
 
@@ -510,12 +519,16 @@ public class NewRequestActivity extends AppCompatActivity implements LocationLis
                             }
                             else
                             {
+
+
                                 if (viewAnimator.getVisibility() == View.VISIBLE) {
                                     viewAnimator.setVisibility(View.GONE);
                                 }
                                 mapsearch = false;
                             }
                         } else {
+
+
                             RequestTypeSet.requestTypeSet.clear();
                             spinnerArrayAdapterRequest.clear();
                             spinnerArrayAdapterRequest.add(new RequestTypeSelectSet(getResources().getString(R.string.TypeHint), ""));
@@ -566,11 +579,11 @@ public class NewRequestActivity extends AppCompatActivity implements LocationLis
     }
 
     private void geocodePlaceAndDisplay(final AutocompletePrediction placePrediction) {
-
         // Construct the request URL
         final String apiKey = getString(R.string.google_maps_key);
         final String url = "https://maps.googleapis.com/maps/api/geocode/json?place_id=%s&key=%s";
         final String requestURL = String.format(url, placePrediction.getPlaceId(), apiKey);
+
 
         // Use the HTTP request URL for Geocoding API to get geographic coordinates for the place
         JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET, requestURL, null, new Response.Listener<JSONObject>() {
@@ -580,7 +593,7 @@ public class NewRequestActivity extends AppCompatActivity implements LocationLis
                     // Inspect the value of "results" and make sure it's not empty
                     JSONArray results = response.getJSONArray("results");
                     if (results.length() == 0) {
-                        Log.w(TAG, "No results from geocoding request.");
+                        System.out.println("######################  No results from geocoding request:" + results.length());
                         return;
                     }
 
@@ -598,13 +611,14 @@ public class NewRequestActivity extends AppCompatActivity implements LocationLis
                     AddressCheck();
                     // displayDialog(placePrediction, result);
                 } catch (JSONException e) {
+                    System.out.println("######################  ERROR:" + e);
                     e.printStackTrace();
                 }
             }
         }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
-                Log.e(TAG, "Request failed");
+                System.out.println("######################  Request failed:" + error);
             }
         });
 
@@ -622,7 +636,6 @@ public class NewRequestActivity extends AppCompatActivity implements LocationLis
 
 
     private void getPlacePredictions(String query) {
-
         // The value of 'bias' biases prediction results to the rectangular region provided
         // (currently Kolkata). Modify these values to get results for another area. Make sure to
         // pass in the appropriate value/s for .setCountries() in the
@@ -643,12 +656,24 @@ public class NewRequestActivity extends AppCompatActivity implements LocationLis
                 .build();
 
         // Perform autocomplete predictions request
+
+        // Add a listener to handle the response.
         placesClient.findAutocompletePredictions(newRequest).addOnSuccessListener(new OnSuccessListener<FindAutocompletePredictionsResponse>() {
             @Override
             public void onSuccess(FindAutocompletePredictionsResponse findAutocompletePredictionsResponse) {
+
                 List<AutocompletePrediction> predictions = findAutocompletePredictionsResponse.getAutocompletePredictions();
                 adapter.setPredictions(predictions);
                 viewAnimator.setDisplayedChild(predictions.isEmpty() ? 0 : 1);
+
+            }
+        }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception exception) {
+                if (exception instanceof ApiException) {
+                    ApiException apiException = (ApiException) exception;
+                    System.out.println("######################  Place not found:" + apiException.getMessage());
+                }
             }
         });
     }

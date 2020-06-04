@@ -21,15 +21,7 @@ public class PushDataKsoap {
 	private static final String SOAP_ACTION = "http://tempuri.org/uploadInformation";
 	private static final String METHOD_NAME = "uploadInformation";
 
-	private ServiceRequestDbHelper dbHelper;
-	private Profile _profile;
-
-	public Boolean passing(Context _Context, Request R, String UniqueId) {
-
-		dbHelper = new ServiceRequestDbHelper(_Context);
-		ProfileDataManager datamanager = new ProfileDataManager();
-		_profile = datamanager.getProfileById(dbHelper, "1");
-		dbHelper.close();
+	public Boolean passing(Profile P, Request R, String UniqueId) {
 
 		MarshalBase64 marshal = new MarshalBase64();
 		try {
@@ -47,17 +39,17 @@ public class PushDataKsoap {
 			request.addProperty("Latitude", String.valueOf(R.Latitude));
 			request.addProperty("Longitude", String.valueOf(R.Longitude));
 			request.addProperty("FullAddress", R.FullAddress);
-			request.addProperty("Last_Name", _profile.lastname);
-			request.addProperty("First_Name", _profile.firstname);
-			request.addProperty("Address",	_profile.streetaddress);
-			request.addProperty("City", _profile.city);
-			request.addProperty("State", _profile.state);
-			request.addProperty("Zip_Code", _profile.zipcode);
-			request.addProperty("Home_Phone", _profile.primaryphone);
+			request.addProperty("Last_Name", P.lastname);
+			request.addProperty("First_Name", P.firstname);
+			request.addProperty("Address",	P.streetaddress);
+			request.addProperty("City", P.city);
+			request.addProperty("State", P.state);
+			request.addProperty("Zip_Code", P.zipcode);
+			request.addProperty("Home_Phone", P.primaryphone);
 			request.addProperty("Business_Phone", "");
 			request.addProperty("Cell_Phone", "");
-			request.addProperty("Alternate_Phone", _profile.secondaryphone);
-			request.addProperty("Email", _profile.email);
+			request.addProperty("Alternate_Phone", P.secondaryphone);
+			request.addProperty("Email", P.email);
 			request.addProperty("Precinct", R.Precinct);
 			request.addProperty("RequestType", R.RequestType);
 			request.addProperty("RequestTypeValue", R.RequestTypeValue);
