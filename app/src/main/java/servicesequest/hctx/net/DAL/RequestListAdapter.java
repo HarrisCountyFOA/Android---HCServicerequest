@@ -7,6 +7,7 @@ import android.opengl.Visibility;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -42,19 +43,46 @@ public class RequestListAdapter extends RecyclerView.Adapter<RequestListAdapter.
             vi = v;
         }
 
-        public void setData(final Request p, int position, final OnItemClickListener listener, int noOfreqs) {
+        public void setData(final Request p, int position, final OnItemClickListener listener, int noOfreqs, final float density) {
             TextView txtName = (TextView) vi.findViewById(R.id.txvName);
             txtName.setText(p.Image_Name);
 
-            ImageView avatar = (ImageView) vi.findViewById(R.id.avatar);
+            Button btnScale = (Button) vi.findViewById(R.id.btnScale);
+            final ImageView avatar = (ImageView) vi.findViewById(R.id.avatar);
 
             if (p.Image != null && p.Image.length > 0) {
-                Bitmap bmp = BitmapFactory.decodeByteArray(p.Image, 0, p.Image.length);
-                avatar.setImageBitmap(Bitmap.createScaledBitmap(bmp, 900,
-                        900, false));
+                final Bitmap bmp = BitmapFactory.decodeByteArray(p.Image, 0, p.Image.length);
+                final int inHeight = bmp.getHeight();
+                final int inWidth = bmp.getWidth();
+                avatar.setScaleType(ImageView.ScaleType.CENTER_CROP);
+
+                if (inWidth > inHeight) {
+                    btnScale.setVisibility(View.GONE);
+                } else {
+                    btnScale.setVisibility(View.VISIBLE);
+                }
+
+                avatar.setImageBitmap(bmp);
                 avatar.setVisibility(View.VISIBLE);
+
+                btnScale.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        if (avatar.getScaleType().equals(ImageView.ScaleType.CENTER_CROP)) {
+                            avatar.getLayoutParams().height = Math.round((float) inHeight * density);
+                            avatar.setScaleType(ImageView.ScaleType.FIT_XY);
+                        } else {
+                            avatar.getLayoutParams().height = Math.round((float) 200 * density);
+                            ;
+                            avatar.setScaleType(ImageView.ScaleType.CENTER_CROP);
+                        }
+                    }
+                });
+
+
             } else {
                 avatar.setVisibility(View.GONE);
+                btnScale.setVisibility(View.GONE);
             }
 
             try {
@@ -118,8 +146,8 @@ public class RequestListAdapter extends RecyclerView.Adapter<RequestListAdapter.
             p.bottomMargin = 12;
             holder.itemView.setLayoutParams(p);
         }
-
-        holder.setData(v, position, listener, _blist.size());
+        float density = _context.getResources().getDisplayMetrics().density;
+        holder.setData(v, position, listener, _blist.size(), density);
 
     }
 

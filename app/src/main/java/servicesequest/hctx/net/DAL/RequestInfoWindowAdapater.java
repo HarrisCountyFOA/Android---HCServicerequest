@@ -5,6 +5,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -47,8 +48,8 @@ public class RequestInfoWindowAdapater implements GoogleMap.InfoWindowAdapter {
 
         if (p.Image != null && p.Image.length > 0) {
             Bitmap bmp = BitmapFactory.decodeByteArray(p.Image, 0, p.Image.length);
-            avatar.setImageBitmap(Bitmap.createScaledBitmap(bmp, 900,
-                    900, false));
+            avatar.setImageBitmap(bmp);
+            avatar.setScaleType(ImageView.ScaleType.CENTER_CROP);
             avatar.setVisibility(View.VISIBLE);
         } else {
             avatar.setVisibility(View.GONE);
@@ -64,6 +65,10 @@ public class RequestInfoWindowAdapater implements GoogleMap.InfoWindowAdapter {
 
             TextView txvTime = (TextView) vi.findViewById(R.id.txvTime);
             txvTime.setText((new SimpleDateFormat("hh.mm aa")).format(date));
+
+            Button btnScale =(Button) vi.findViewById(R.id.btnScale);
+            btnScale.setVisibility(View.GONE);
+
         } catch (ParseException e) {
 
         }
