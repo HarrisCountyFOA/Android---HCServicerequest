@@ -703,8 +703,8 @@ public class NewRequestActivity extends AppCompatActivity implements LocationLis
                             text4.setText(comContact.email);
                             text5.setText(comContact.phone);
                             text6.setText(comContact.website);
-                            text7.setText(comContact.streetaddress);
-                            text8.setText(comContact.city);
+                            text7.setText(comContact.streetaddress+ "\n" + comContact.city);
+                            text8.setText("");
                         }
 
                         cmView.setVisibility(View.VISIBLE);

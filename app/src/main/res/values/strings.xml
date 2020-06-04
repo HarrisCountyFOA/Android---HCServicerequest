@@ -235,47 +235,47 @@ YOU EXPRESSLY UNDERSTAND AND AGREE THAT YOUR USE OF THE APPLICATION IS AT YOUR S
     }
   ]
   </string>
-  <string name="normal_map">Normal</string>
-  <string name="hybrid_map">Hybrid</string>
-  <string name="terrain_map">Terrain</string>
-  <string name="satellite_map">Satellite</string>
+    <string name="normal_map">Normal</string>
+    <string name="hybrid_map">Hybrid</string>
+    <string name="terrain_map">Terrain</string>
+    <string name="satellite_map">Satellite</string>
     <string name="welcome_to">Welcome to</string>
-  <string name="home_text">You Need a profile to submit a service request, so let\'s create  a profile and get started.</string>
-  <string name="edit_profile">Edit Your Profile</string>
-  <string name="create_profile">Create Your Profile</string>
-  <string name="new_request">Submit a Request</string>
-  <string name="no_request_have_been_submitted">No request have been submitted!</string>
+    <string name="home_text">You need a profile to submit a service request, so let\'s create  a profile and get started.</string>
+    <string name="edit_profile">Edit Your Profile</string>
+    <string name="create_profile">Create Profile</string>
+    <string name="new_request">Submit a Request</string>
+    <string name="no_request_have_been_submitted">No requests have been submitted.</string>
 
-  <!-- START NEW REQUEST -->
-  <string name="Description">Description</string>
-  <string name="Type">Type</string>
-  <string name="Location">Location</string>
-  <string name="Photo">Photo</string>
-
-
-  <string name="AddressHint"><font size="15">Enter an address</font></string>
-  <string name="DescHint"><font size="15">Please enter a brief description of the issue you are reporting.</font></string>
-  <string name="TypeHint"><font size="15">Tab here to select a request type</font></string>
-  <string name="TypePopupHint">Select Request Type</string>
-
-  <string name="RequestSuccess">Request Saved Successfully!!</string>
-  <string name="RequestFailed">Failed to save request. Please try again!!</string>
-
-  <string name="ErrAddress">Address is required!</string>
-  <string name="ErrAddressInvalid">Invalid Address!</string>
-  <string name="ErrType">Request Type is Required.</string>
-  <string name="ErrDescription">Description is required!</string>
-  <string name="ErrInvalidHarrisCountyAddress">You need a Harris County address to submit a services request.</string>
-  <string name="requestPermissions">Location permission are needed which allows you to access this feature.</string>
+    <!-- START NEW REQUEST -->
+    <string name="Description">Description</string>
+    <string name="Type">Type</string>
+    <string name="Location">Location</string>
+    <string name="Photo">Photo</string>
 
 
-  <string name="TakePicture">Take a picture:</string>
-  <string name="AddUpdate">Add/Update</string>
-  <string name="Remove">Remove</string>
-  <string name="PicturePopTitle">What would you like to do</string>
-  <string name="PhotoTitleAdd">Tap here to add a photo</string>
-  <string name="PhotoTitleUpdate">Tap here to update photo</string>
-  <string name="PicturePopCancel">Cancel</string>
-  <!-- END NEW REQUEST -->
+    <string name="AddressHint"><font size="15">Enter an address</font></string>
+    <string name="DescHint"><font size="15">Please enter a brief description of the issue you are reporting.</font></string>
+    <string name="TypeHint"><font size="15">Tab here to select a request type</font></string>
+    <string name="TypePopupHint">Select Request Type</string>
+
+    <string name="RequestSuccess">Request Saved Successfully!!</string>
+    <string name="RequestFailed">Failed to save request. Please try again!!</string>
+
+    <string name="ErrAddress">Address is required!</string>
+    <string name="ErrAddressInvalid">Invalid Address!</string>
+    <string name="ErrType">Request Type is Required.</string>
+    <string name="ErrDescription">Description is required!</string>
+    <string name="ErrInvalidHarrisCountyAddress">You need a Harris County address to submit a services request.</string>
+    <string name="requestPermissions">Location permission are needed which allows you to access this feature.</string>
+
+
+    <string name="TakePicture">Take a picture:</string>
+    <string name="AddUpdate">Add/Update</string>
+    <string name="Remove">Remove</string>
+    <string name="PicturePopTitle">What would you like to do</string>
+    <string name="PhotoTitleAdd">Tap here to add a photo</string>
+    <string name="PhotoTitleUpdate">Tap here to update photo</string>
+    <string name="PicturePopCancel">Cancel</string>
+    <!-- END NEW REQUEST -->
 
 </resources>

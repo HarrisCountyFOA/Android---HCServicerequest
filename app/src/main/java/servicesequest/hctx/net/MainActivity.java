@@ -159,11 +159,13 @@ public class MainActivity extends AppCompatActivity {
                             textView.setVisibility(View.GONE);
                             txtNoReports.setText(getString(R.string.no_request_have_been_submitted));
                             btnEditProfile.setText(getString(R.string.edit_profile));
+                            btnEditProfile.setVisibility(View.GONE);
                         } else {
                             btnNewRequest.setVisibility(View.GONE);
                             textView.setVisibility(View.VISIBLE);
                             txtNoReports.setText("");
                             btnEditProfile.setText(getString(R.string.create_profile));
+                            btnEditProfile.setVisibility(View.VISIBLE);
                         }
 
                     } else {

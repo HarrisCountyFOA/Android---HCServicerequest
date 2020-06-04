@@ -3,6 +3,7 @@ package servicesequest.hctx.net;
 import android.content.Intent;
 import android.os.Bundle;
 import android.telephony.PhoneNumberFormattingTextWatcher;
+import android.text.InputFilter;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -63,9 +64,6 @@ public class ProfileActivity extends AppCompatActivity {
         tv_ZipCode = findViewById(R.id.zipcode);
         _appPrefs = new AppPreferences(this, "UserProfile");
 
-        tv_PrimaryPhone.addTextChangedListener(new PhoneNumberFormattingTextWatcher());
-        tv_SecondaryPhone.addTextChangedListener(new PhoneNumberFormattingTextWatcher());
-
         tv_FirstName.setFocusableInTouchMode(true);
         tv_FirstName.requestFocus();
 
@@ -78,8 +76,16 @@ public class ProfileActivity extends AppCompatActivity {
                 initScreen(profileId);
             }
         }
+
+        tv_PrimaryPhone.addTextChangedListener(new HCPhoneFormattingTextWatcher(this, tv_PrimaryPhone));
+        tv_SecondaryPhone.addTextChangedListener(new HCPhoneFormattingTextWatcher(this, tv_SecondaryPhone));
     }
 
+    public void setEditTextMaxLength(EditText editText, int length) {
+        InputFilter[] FilterArray = new InputFilter[1];
+        FilterArray[0] = new InputFilter.LengthFilter(length);
+        editText.setFilters(FilterArray);
+    }
 
 //    @Override
 //    public void onBackPressed() {
@@ -110,6 +116,7 @@ public class ProfileActivity extends AppCompatActivity {
                         tv_ZipCode.setText(prof.zipcode);
                         tv_PrimaryPhone.setText(prof.primaryphone);
                         tv_SecondaryPhone.setText(prof.secondaryphone);
+
                     } else {
                         Toast.makeText(getApplicationContext(), "No profile found", Toast.LENGTH_LONG).show();
                     }
@@ -166,17 +173,8 @@ public class ProfileActivity extends AppCompatActivity {
 
             String addr = null;
 
-            if (insUpd.streetaddress != null && !insUpd.streetaddress.trim().equals("")) {
-                addr = insUpd.streetaddress;
-                if (insUpd.city != null && !insUpd.city.trim().equals("")) {
-                    addr = addr + ", " + insUpd.city;
-                    if (insUpd.state != null && !insUpd.state.trim().equals("")) {
-                        addr = addr + ", " + insUpd.state;
-                        if (insUpd.zipcode != null && !insUpd.zipcode.trim().equals("")) {
-                            addr = addr + " " + insUpd.zipcode;
-                        }
-                    }
-                }
+            if (insUpd.streetaddress != null && !insUpd.streetaddress.trim().equals("") && insUpd.city != null && !insUpd.city.trim().equals("") && insUpd.state != null && !insUpd.state.trim().equals("") && insUpd.zipcode != null && !insUpd.zipcode.trim().equals("")) {
+                addr = insUpd.streetaddress + ", " + insUpd.city + ", " + insUpd.state+ " " + insUpd.zipcode;
             }
 
 
@@ -227,18 +225,38 @@ public class ProfileActivity extends AppCompatActivity {
             results = true;
         }
 
-        if (tv_PrimaryPhone.getText().toString().trim().length() > 0 && digitCount(tv_PrimaryPhone.getText().toString().trim()) != 10) {
+        if (tv_PrimaryPhone.getText().toString().trim().length() > 0 && (digitCount(tv_PrimaryPhone.getText().toString().trim()) != 10 && digitCount(tv_PrimaryPhone.getText().toString().trim()) != 11)) {
             tv_PrimaryPhone.setError("Primary Phone Is Invalid!");
             tv_PrimaryPhone.requestFocus();
             tv_PrimaryPhone.setFocusableInTouchMode(true);
             results = true;
         }
+        else
+        {
+            if (tv_PrimaryPhone.getText().toString().trim().startsWith("11"))
+            {
+                tv_PrimaryPhone.setError("Primary Phone Is Invalid!");
+                tv_PrimaryPhone.requestFocus();
+                tv_PrimaryPhone.setFocusableInTouchMode(true);
+                results = true;
+            }
+        }
 
-        if (tv_SecondaryPhone.getText().toString().trim().length() > 0 && digitCount(tv_SecondaryPhone.getText().toString()) != 10) {
+        if (tv_SecondaryPhone.getText().toString().trim().length() > 0 && (digitCount(tv_SecondaryPhone.getText().toString()) != 10 && digitCount(tv_SecondaryPhone.getText().toString()) != 11)) {
             tv_SecondaryPhone.setError("Secondary Phone Is Invalid!");
             tv_SecondaryPhone.requestFocus();
             tv_SecondaryPhone.setFocusableInTouchMode(true);
             results = true;
+        }
+        else
+        {
+            if (tv_SecondaryPhone.getText().toString().trim().startsWith("11"))
+            {
+                tv_SecondaryPhone.setError("Secondary Phone Is Invalid!");
+                tv_SecondaryPhone.requestFocus();
+                tv_SecondaryPhone.setFocusableInTouchMode(true);
+                results = true;
+            }
         }
 
 //
@@ -276,3 +294,5 @@ public class ProfileActivity extends AppCompatActivity {
     }
 
 }
+
+
