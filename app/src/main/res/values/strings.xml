@@ -1,12 +1,12 @@
 <resources>
     <string name="app_name">Harris Helps</string>
     <string name="PROFILE_ADDRESS">Street Address</string>
-    <string name="PROFILE_EMAIL">Email</string>
+    <string name="PROFILE_EMAIL">Email (required)</string>
     <string name="PROFILE_PRIMARYPHONE">Primary Phone</string>
     <string name="PROFILE_SECONDARYPHONE">Secondary Phone</string>
     <string name="PROFILE_BUTTON">Profile</string>
-    <string name="PROFILE_FIRSTNAME">First Name</string>
-    <string name="PROFILE_LASTNAME">Last Name</string>
+    <string name="PROFILE_FIRSTNAME">First Name (required)</string>
+    <string name="PROFILE_LASTNAME">Last Name (required)</string>
     <string name="PROFILE_CITY">City</string>
     <string name="PROFILE_STATE">State</string>
     <string name="PROFILE_ZIPCODE">Zip Code</string>
