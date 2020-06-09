@@ -17,16 +17,25 @@
         android:layout_height="match_parent"
         android:background="@color/Border">
 
+
         <ImageView
             android:id="@+id/avatar"
             android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:contentDescription="thumbnail"
-            android:scaleType="fitXY"
+            android:layout_height="200dp"
+            android:scaleType="centerCrop"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             />
+
+        <Button
+            android:id="@+id/btnScale"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_margin="5dp"
+            app:layout_constraintStart_toStartOf="@+id/avatar"
+            app:layout_constraintTop_toTopOf="@+id/avatar"
+            android:background="@drawable/ic_swap_vertical_circle_black_24dp" />
 
         <TextView
             android:id="@+id/txvName"

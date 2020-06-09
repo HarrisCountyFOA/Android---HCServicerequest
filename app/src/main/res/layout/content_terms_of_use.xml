@@ -1,51 +1,46 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:fillViewport="true"
-    app:layout_behavior="@string/appbar_scrolling_view_behavior">
+    android:layout_marginTop="10dp"
+    android:layout_marginBottom="60dp"
+    app:layout_behavior="@string/appbar_scrolling_view_behavior"
+    tools:context=".RequestDetailsActivity">
 
-    <androidx.constraintlayout.widget.ConstraintLayout
+    <ImageView
+        android:id="@+id/hcavatar"
+        android:layout_width="150dp"
+        android:layout_height="150dp"
+        android:contentDescription="thumbnail"
+        android:scaleType="centerCrop"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="@drawable/hclogo" />
+
+    <androidx.cardview.widget.CardView
+        android:id="@+id/TermsListCardView"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_marginTop="10dp"
-        android:layout_marginBottom="80dp"
-        app:layout_behavior="@string/appbar_scrolling_view_behavior"
-        tools:context=".RequestDetailsActivity">
+        android:layout_height="wrap_content"
+        android:layout_margin="10dp"
+        app:cardBackgroundColor="@color/Border"
+        app:cardCornerRadius="5dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/hcavatar">
 
-        <ImageView
-            android:id="@+id/hcavatar"
-            android:layout_width="150dp"
-            android:layout_height="150dp"
-            android:contentDescription="thumbnail"
-            android:scaleType="centerCrop"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:srcCompat="@drawable/hclogo" />
-
-        <androidx.cardview.widget.CardView
-            android:id="@+id/TermsListCardView"
+        <androidx.core.widget.NestedScrollView
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_margin="12dp"
-            android:layout_marginTop="0dp"
-            android:layout_marginBottom="0dp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/hcavatar"
-            app:cardBackgroundColor="@color/Border"
-            app:cardCornerRadius="5dp"
-            app:contentPaddingBottom="16dp">
+            android:layout_height="wrap_content" android:fillViewport="true">
 
             <TextView
+                android:id="@+id/txtTerms"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent" android:id="@+id/txtTerms"
-                android:layout_margin="@dimen/text_margin" />
-        </androidx.cardview.widget.CardView>
+                android:layout_height="match_parent"
+                android:layout_margin="@dimen/text_margin" android:paddingBottom="150dp" />
+        </androidx.core.widget.NestedScrollView>
+    </androidx.cardview.widget.CardView>
 
-    </androidx.constraintlayout.widget.ConstraintLayout>
-
-</androidx.core.widget.NestedScrollView>
+</androidx.constraintlayout.widget.ConstraintLayout>

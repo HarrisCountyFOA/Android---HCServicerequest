@@ -1,5 +1,6 @@
 package servicesequest.hctx.net;
 
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -13,6 +14,7 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.constraintlayout.widget.ConstraintLayout;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
@@ -98,14 +100,11 @@ public class RequestDetailsActivity extends AppCompatActivity {
 
                     Boolean profileSet = _appPrefs.getBoolean("ProfileSet");
 
-                    if(profileSet)
-                    {
+                    if (profileSet) {
                         Intent pi = new Intent(getApplicationContext(), ProfileList.class);
                         pi.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
                         startActivity(pi);
-                    }
-                    else
-                    {
+                    } else {
                         Intent pi = new Intent(getApplicationContext(), ProfileActivity.class);
                         pi.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
                         startActivity(pi);
@@ -122,6 +121,11 @@ public class RequestDetailsActivity extends AppCompatActivity {
         }
     };
 
+    public static int dpToPx(int dp, Context context) {
+        float density = context.getResources().getDisplayMetrics().density;
+        return Math.round((float) dp * density);
+    }
+
     private void initScreen(String id) {
 
         dbHelper = new ServiceRequestDbHelper(this);
@@ -135,8 +139,12 @@ public class RequestDetailsActivity extends AppCompatActivity {
                     if (p != null && p._id != null && !p._id.equals("")) {
                         if (p.Image != null && p.Image.length > 0) {
                             Bitmap bmp = BitmapFactory.decodeByteArray(p.Image, 0, p.Image.length);
-                            avatar.setImageBitmap(Bitmap.createScaledBitmap(bmp, 900,
-                                    900, false));
+                            int height = bmp.getHeight();
+                            ConstraintLayout.LayoutParams parms = new ConstraintLayout.LayoutParams(avatar.getWidth(), dpToPx(height, getApplicationContext()));
+                            avatar.setLayoutParams(parms);
+                            avatar.setScaleType(ImageView.ScaleType.FIT_XY);
+                            avatar.setImageBitmap(bmp);
+
                             avatar.setVisibility(View.VISIBLE);
                         } else {
                             avatar.setVisibility(View.GONE);
