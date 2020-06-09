@@ -45,26 +45,6 @@ public final class ImagePicker {
         // not called
     }
 
-    /**
-     * Launch a dialog to pick an image from camera/gallery apps.
-     *
-     * @param activity which will launch the dialog.
-     */
-    public static void pickImage(Activity activity) {
-        String chooserTitle = activity.getString(R.string.pick_image_intent_text);
-        pickImage(activity, chooserTitle);
-    }
-
-    /**
-     * Launch a dialog to pick an image from camera/gallery apps.
-     *
-     * @param fragment which will launch the dialog and will get the result in
-     *                 onActivityResult()
-     */
-    public static void pickImage(Fragment fragment) {
-        String chooserTitle = fragment.getString(R.string.pick_image_intent_text);
-        pickImagefragment(fragment, chooserTitle);
-    }
 
     /**
      * Launch a dialog to pick an image from camera/gallery apps.
@@ -72,21 +52,11 @@ public final class ImagePicker {
      * @param activity     which will launch the dialog.
      * @param chooserTitle will appear on the picker dialog.
      */
-    public static void pickImage(Activity activity, String chooserTitle) {
-        Intent chooseImageIntent = getPickImageIntent(activity, chooserTitle);
-        activity.startActivityForResult(chooseImageIntent, PICK_IMAGE_REQUEST_CODE);
-    }
+    public static void pickImage(Activity activity, String chooserTitle, String Type) {
 
-    /**
-     * Launch a dialog to pick an image from camera/gallery apps.
-     *
-     * @param fragment     which will launch the dialog and will get the result in
-     *                     onActivityResult()
-     * @param chooserTitle will appear on the picker dialog.
-     */
-    public static void pickImagefragment(Fragment fragment, String chooserTitle) {
-        Intent chooseImageIntent = getPickImageIntent(fragment.getContext(), chooserTitle);
-        fragment.startActivityForResult(chooseImageIntent, PICK_IMAGE_REQUEST_CODE);
+        Intent chooseImageIntent = getPickImageIntent(activity, chooserTitle, Type);
+        activity.startActivityForResult(chooseImageIntent, PICK_IMAGE_REQUEST_CODE);
+
     }
 
     /**
@@ -96,37 +66,40 @@ public final class ImagePicker {
      * @param chooserTitle will appear on the picker dialog.
      * @return intent launcher.
      */
-    public static Intent getPickImageIntent(Context context, String chooserTitle) {
+    public static Intent getPickImageIntent(Context context, String chooserTitle, String Type) {
         Intent chooserIntent = null;
         List<Intent> intentList = new ArrayList<>();
 
-        Intent pickIntent = new Intent(Intent.ACTION_PICK,
-                MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-        intentList = addIntentsToList(context, intentList, pickIntent);
+        if (Type.equals("library")) {
+            Intent pickIntent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+            intentList = addIntentsToList(context, intentList, pickIntent);
+        }
 
         // Camera action will fail if the app does not have permission, check before adding intent.
         // We only need to add the camera intent if the app does not use the CAMERA permission
         // in the androidmanifest.xml
         // Or if the user has granted access to the camera.
         // See https://developer.android.com/reference/android/provider/MediaStore.html#ACTION_IMAGE_CAPTURE
-        if (!appManifestContainsPermission(context, Manifest.permission.CAMERA) || hasCameraAccess(context)) {
-            Intent takePhotoIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-            takePhotoIntent.putExtra("return-data", true);
-            //takePhotoIntent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(getTemporalFile(context)));
-            takePhotoIntent.putExtra(MediaStore.EXTRA_OUTPUT, FileProvider.getUriForFile(context, context.getApplicationContext().getPackageName() + ".my.package.name.provider", getTemporalFile(context)));
+        if (Type.equals("Camera")) {
+            if (!appManifestContainsPermission(context, Manifest.permission.CAMERA) || hasCameraAccess(context)) {
+                Intent takePhotoIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+                takePhotoIntent.putExtra("return-data", true);
+                //takePhotoIntent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(getTemporalFile(context)));
+                takePhotoIntent.putExtra(MediaStore.EXTRA_OUTPUT, FileProvider.getUriForFile(context, context.getApplicationContext().getPackageName() + ".my.package.name.provider", getTemporalFile(context)));
 
-            intentList = addIntentsToList(context, intentList, takePhotoIntent);
+                intentList = addIntentsToList(context, intentList, takePhotoIntent);
+            }
         }
 
         if (intentList.size() > 0) {
-            chooserIntent = Intent.createChooser(intentList.remove(intentList.size() - 1),
-                    chooserTitle);
-            chooserIntent.putExtra(Intent.EXTRA_INITIAL_INTENTS,
-                    intentList.toArray(new Parcelable[intentList.size()]));
+            chooserIntent = Intent.createChooser(intentList.remove(intentList.size() - 1), chooserTitle);
+            chooserIntent.putExtra(Intent.EXTRA_INITIAL_INTENTS, intentList.toArray(new Parcelable[intentList.size()]));
         }
 
         return chooserIntent;
     }
+
+
 
     private static List<Intent> addIntentsToList(Context context, List<Intent> list, Intent intent) {
         //Log.i(TAG, "Adding intents of type: " + intent.getAction());

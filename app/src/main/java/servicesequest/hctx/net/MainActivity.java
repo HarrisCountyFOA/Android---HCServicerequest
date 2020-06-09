@@ -84,14 +84,8 @@ public class MainActivity extends AppCompatActivity {
         btnAdd.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-
-
-                if (AppPermission.checkLocationPermission(MainActivity.this)) {
                     Intent ti = new Intent(getApplicationContext(), NewRequestActivity.class);
                     startActivityForResult(ti, 1);
-                }
-
-
             }
         });
 
@@ -111,11 +105,8 @@ public class MainActivity extends AppCompatActivity {
         btnNewRequest.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
-                if (AppPermission.checkLocationPermission(MainActivity.this)) {
                     Intent pi = new Intent(getApplicationContext(), NewRequestActivity.class);
                     startActivity(pi);
-                }
             }
         });
     }
@@ -240,20 +231,26 @@ public class MainActivity extends AppCompatActivity {
         }
     };
 
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        for(String permission: permissions){
-            if(ActivityCompat.shouldShowRequestPermissionRationale(MainActivity.this, permission)){
-                Toast.makeText(MainActivity.this, R.string.requestPermissions, Toast.LENGTH_LONG).show();
-                //Log.e("denied", permission);  //denied
-            }else{
-                if(ActivityCompat.checkSelfPermission((MainActivity.this), permission) == PackageManager.PERMISSION_GRANTED){
-                    //Log.e("allowed", permission); //allowed
-                } else{
-                    //Log.e("set to never ask again", permission); //set to never ask again
-                    Toast.makeText(MainActivity.this, R.string.requestPermissions, Toast.LENGTH_LONG).show();
-                }
-            }
-        }
-    }
+//    @Override
+//    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+//        for(String permission: permissions){
+//            if(ActivityCompat.shouldShowRequestPermissionRationale(MainActivity.this, permission)){
+//                Toast.makeText(MainActivity.this, R.string.requestPermissions, Toast.LENGTH_LONG).show();
+//                Intent ti = new Intent(getApplicationContext(), NewRequestActivity.class);
+//                startActivity(ti);
+//                //Log.e("denied", permission);  //denied
+//            }else{
+//                if(ActivityCompat.checkSelfPermission((MainActivity.this), permission) == PackageManager.PERMISSION_GRANTED){
+//                    Intent ti = new Intent(getApplicationContext(), NewRequestActivity.class);
+//                    startActivity(ti);
+//                    //Log.e("allowed", permission); //allowed
+//                } else{
+//                    //Log.e("set to never ask again", permission); //set to never ask again
+//                    Intent ti = new Intent(getApplicationContext(), NewRequestActivity.class);
+//                    startActivity(ti);
+//                    //Toast.makeText(MainActivity.this, R.string.requestPermissions, Toast.LENGTH_LONG).show();
+//                }
+//            }
+//        }
+//    }
 }

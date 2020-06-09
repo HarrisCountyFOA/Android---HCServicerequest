@@ -1,5 +1,6 @@
 package servicesequest.hctx.net;
 
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -36,6 +37,7 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.ScrollView;
@@ -110,6 +112,7 @@ import servicesequest.hctx.net.Utility.AppPermission;
 import servicesequest.hctx.net.Utility.FusedLocationProvider;
 import servicesequest.hctx.net.Utility.GoogleMapWithScrollFix;
 import servicesequest.hctx.net.Utility.ImagePicker;
+import servicesequest.hctx.net.Utility.Network;
 import servicesequest.hctx.net.Utility.Utils;
 
 
@@ -165,6 +168,7 @@ public class NewRequestActivity extends AppCompatActivity implements LocationLis
     public byte[] Bitmap_Image;
     Button btnPictureDelete;
     RelativeLayout imagePreview;
+    ImageButton imbtMyLocation;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -186,6 +190,9 @@ public class NewRequestActivity extends AppCompatActivity implements LocationLis
 
         Places.initialize(getApplicationContext(), getString(R.string.google_maps_key));
 
+
+
+
         placesClient = Places.createClient(this);
         queue = Volley.newRequestQueue(this);
         txtView = findViewById(R.id.place_search);
@@ -194,6 +201,7 @@ public class NewRequestActivity extends AppCompatActivity implements LocationLis
         txtAddPhoto = findViewById(R.id.txtAddPhoto);
         btnPicture = findViewById(R.id.btnPicture);
         spinnerRequest = findViewById(R.id.spinnerRequest);
+        imbtMyLocation = findViewById(R.id.imbtMyLocation);
 
         //Make the keyboard have done using textMultiLine
         txtDescription.setImeOptions(EditorInfo.IME_ACTION_DONE);
@@ -278,38 +286,9 @@ public class NewRequestActivity extends AppCompatActivity implements LocationLis
 
                 if (AppPermission.checkCameraPermission(NewRequestActivity.this)) {
                     if (!imageSet) {
-                        ImagePicker.pickImage(NewRequestActivity.this, getResources().getString(R.string.TakePicture));
+                        CameraPopUp(true);
                     } else {
-                        final CharSequence[] items = {getResources().getString(R.string.AddUpdate), getResources().getString(R.string.Remove),};
-                        AlertDialog.Builder builder = new AlertDialog.Builder(NewRequestActivity.this);
-                        builder.setTitle(getResources().getString(R.string.PicturePopTitle));
-                        builder.setItems(items, new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int which) {
-
-                                switch (which) {
-                                    case 0: //Add/Update
-                                    {
-                                        ImagePicker.pickImage(NewRequestActivity.this, getResources().getString(R.string.TakePicture));
-                                    }
-                                    case 1: //Remove
-                                    {
-                                        imageSet = false;
-                                        Bitmap_Image = null;
-                                        imagePreview.setVisibility(View.GONE);
-                                        txtAddPhoto.setText(getResources().getString(R.string.PhotoTitleAdd));
-                                        imgPhotoActive.setImageResource(R.drawable.ic_check_circle_silver_24dp);
-                                    }
-                                }
-                            }
-                        });
-                        builder.setNegativeButton(getResources().getString(R.string.PicturePopCancel), new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                dialog.dismiss();
-                            }
-                        });
-
-                        builder.show();
+                        CameraPopUp(false);
                     }
                 }
 
@@ -327,6 +306,13 @@ public class NewRequestActivity extends AppCompatActivity implements LocationLis
             }
         });
 
+        imbtMyLocation.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                StartLocation();
+
+            }
+        });
 
         spinnerRequest.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
@@ -358,9 +344,7 @@ public class NewRequestActivity extends AppCompatActivity implements LocationLis
             }
         });
 
-        //Start a connect for location
-        fusedLocationProvider = new FusedLocationProvider(NewRequestActivity.this, this);
-        fusedLocationProvider.connect();
+        StartLocation();
 
         // Obtain the Custom GoogleMapWithScrollFix and get notified when the map is ready to be used.
         //So map can work with scroll
@@ -402,6 +386,55 @@ public class NewRequestActivity extends AppCompatActivity implements LocationLis
         });
     }
 
+
+    public void CameraPopUp(Boolean item) {
+
+        final CharSequence[] items;
+
+        if (item)
+            items = new CharSequence[]{"Take photo", "Choose from library"};
+        else
+            items = new CharSequence[]{"Take photo", "Choose from library", getResources().getString(R.string.Remove)};
+
+        //final CharSequence[] items = {"Take photo", "Choose from library", getResources().getString(R.string.Remove),};
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(NewRequestActivity.this);
+        builder.setTitle(getResources().getString(R.string.PicturePopTitle));
+        builder.setItems(items, new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int which) {
+
+                switch (which) {
+                    case 0: //Add/Update
+                    {
+                        ImagePicker.pickImage(NewRequestActivity.this, "Take photo", "Camera");
+                        break;
+                    }
+                    case 1: //Add/Update
+                    {
+                        ImagePicker.pickImage(NewRequestActivity.this, "Choose from library", "library");
+                        break;
+                    }
+                    case 2: //Remove
+                    {
+                        imageSet = false;
+                        Bitmap_Image = null;
+                        imagePreview.setVisibility(View.GONE);
+                        txtAddPhoto.setText(getResources().getString(R.string.PhotoTitleAdd));
+                        imgPhotoActive.setImageResource(R.drawable.ic_check_circle_silver_24dp);
+                        break;
+                    }
+                }
+            }
+        });
+        builder.setNegativeButton(getResources().getString(R.string.PicturePopCancel), new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+            }
+        });
+
+        builder.show();
+    }
 
 
     protected void onActivityResult(int requestCode, int resultCode, Intent imageReturnedIntent) {
@@ -458,6 +491,12 @@ public class NewRequestActivity extends AppCompatActivity implements LocationLis
     }
 
     private void saveRequest() {
+
+        if (!Network.isOnline(NewRequestActivity.this)) {
+            Toast.makeText(NewRequestActivity.this, R.string.err_network, Toast.LENGTH_LONG).show();
+
+            return;
+        }
 
         if (!Validation()) {
 
@@ -546,8 +585,6 @@ public class NewRequestActivity extends AppCompatActivity implements LocationLis
                             }
                             else
                             {
-
-
                                 if (viewAnimator.getVisibility() == View.VISIBLE) {
                                     viewAnimator.setVisibility(View.GONE);
                                 }
@@ -789,6 +826,20 @@ public class NewRequestActivity extends AppCompatActivity implements LocationLis
             inputManager.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
     }
 
+    public void StartLocation() {
+        //Start a connect for location
+        if (AppPermission.checkLocationPermission(NewRequestActivity.this)) {
+
+            if (!Network.isLocationEnabled(NewRequestActivity.this)) {
+                Network.buildAlertMessageNoGps(NewRequestActivity.this);
+                return;
+            }
+
+            fusedLocationProvider = new FusedLocationProvider(NewRequestActivity.this, this);
+            fusedLocationProvider.connect();
+        }
+    }
+
     private void initMap()
     {
         LatLng hc = new LatLng(myLocation.latitude, myLocation.longitude);
@@ -855,15 +906,21 @@ public class NewRequestActivity extends AppCompatActivity implements LocationLis
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         for (String permission : permissions) {
             if (ActivityCompat.shouldShowRequestPermissionRationale(this, permission)) {
-                Toast.makeText(NewRequestActivity.this, R.string.requestPermissions, Toast.LENGTH_LONG).show();
+                Toast.makeText(NewRequestActivity.this, R.string.requestPermissions, Toast.LENGTH_SHORT).show();
                 //Log.e("denied", permission);  //denied
             } else {
                 if (ActivityCompat.checkSelfPermission(this, permission) == PackageManager.PERMISSION_GRANTED) {
-                    //Log.e("allowed", permission); //allowed
+                    System.out.println("######################  allowed:" + permission);
+                    if (permission.equals("android.permission.CAMERA")){
+                        CameraPopUp(true);
+                    }
+
                 } else {
                     //Log.e("set to never ask again", permission); //set to never ask again
                     //if (permission.equals("android.permission.CAMERA"))
-                    Toast.makeText(NewRequestActivity.this, R.string.requestPermissions, Toast.LENGTH_LONG).show();
+
+                    //System.out.println("######################  don't ask:" + permission);
+                    Toast.makeText(NewRequestActivity.this, R.string.requestPermissionsDontAsk, Toast.LENGTH_SHORT).show();
                 }
             }
         }

@@ -5,6 +5,7 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.os.AsyncTask;
 
+import servicesequest.hctx.net.R;
 import servicesequest.hctx.net.Utility.GeocodingLocation;
 
 
@@ -31,7 +32,7 @@ public class RequestTypeAsync extends AsyncTask<Void, Void, Boolean> {
 	@Override
 	protected void onPreExecute() {
 		super.onPreExecute();
-		pd = new ProgressDialog(_Context, AlertDialog.THEME_HOLO_LIGHT);
+		pd = new ProgressDialog(_Context, R.style.MyDialogTheme);
 		pd.setTitle("Verifying Address");
 		pd.setMessage("Please wait...");
 		pd.setCancelable(false);

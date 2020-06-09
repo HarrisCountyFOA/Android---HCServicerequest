@@ -267,6 +267,7 @@ YOU EXPRESSLY UNDERSTAND AND AGREE THAT YOUR USE OF THE APPLICATION IS AT YOUR S
     <string name="ErrDescription">Description is required!</string>
     <string name="ErrInvalidHarrisCountyAddress">You need a Harris County address to submit a services request.</string>
     <string name="requestPermissions">Location permission are needed which allows you to access this feature.</string>
+    <string name="requestPermissionsDontAsk">Location permission are disable in the settings of the app.</string>
 
 
     <string name="TakePicture">Take a picture:</string>
@@ -276,6 +277,11 @@ YOU EXPRESSLY UNDERSTAND AND AGREE THAT YOUR USE OF THE APPLICATION IS AT YOUR S
     <string name="PhotoTitleAdd">Tap here to add a photo</string>
     <string name="PhotoTitleUpdate">Tap here to update photo</string>
     <string name="PicturePopCancel">Cancel</string>
+
+  <string name="err_network">NETWORK UNAVAILABLE PLEASE TRY LATER</string>
+  <string name="gps_msg">Location is disabled, do you want to enable it?</string>
+  <string name="yes">Yes</string>
+  <string name="no">No</string>
     <!-- END NEW REQUEST -->
 
 </resources>
