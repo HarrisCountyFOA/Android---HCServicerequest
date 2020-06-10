@@ -6,6 +6,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.graphics.Typeface;
@@ -51,6 +52,7 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.cardview.widget.CardView;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.app.ActivityCompat;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -167,7 +169,7 @@ public class NewRequestActivity extends AppCompatActivity implements LocationLis
     int selectedItem = -1;
     public byte[] Bitmap_Image;
     Button btnPictureDelete;
-    RelativeLayout imagePreview;
+    ConstraintLayout itemConstraintLayout;
     ImageButton imbtMyLocation;
 
     @Override
@@ -273,11 +275,11 @@ public class NewRequestActivity extends AppCompatActivity implements LocationLis
         imgLocationActive = findViewById(R.id.imgLocationActive);
         imgPhotoActive = findViewById(R.id.imgPhotoActive);
         btnPictureDelete = findViewById(R.id.btnPictureDelete);
-        imagePreview = findViewById(R.id.imagePreview);
+        itemConstraintLayout = findViewById(R.id.itemConstraintLayout);
 
         cmView = findViewById(R.id.cmView);
         cmView.setVisibility(View.GONE);
-        imagePreview.setVisibility(View.GONE);
+        itemConstraintLayout.setVisibility(View.GONE);
 
         initRecyclerView();
         txtAddPhoto.setOnClickListener(new View.OnClickListener() {
@@ -300,7 +302,7 @@ public class NewRequestActivity extends AppCompatActivity implements LocationLis
             public void onClick(View v) {
                 imageSet = false;
                 Bitmap_Image = null;
-                imagePreview.setVisibility(View.GONE);
+                itemConstraintLayout.setVisibility(View.GONE);
                 txtAddPhoto.setText(getResources().getString(R.string.PhotoTitleAdd));
                 imgPhotoActive.setImageResource(R.drawable.ic_check_circle_silver_24dp);
             }
@@ -418,7 +420,7 @@ public class NewRequestActivity extends AppCompatActivity implements LocationLis
                     {
                         imageSet = false;
                         Bitmap_Image = null;
-                        imagePreview.setVisibility(View.GONE);
+                        itemConstraintLayout.setVisibility(View.GONE);
                         txtAddPhoto.setText(getResources().getString(R.string.PhotoTitleAdd));
                         imgPhotoActive.setImageResource(R.drawable.ic_check_circle_silver_24dp);
                         break;
@@ -447,8 +449,47 @@ public class NewRequestActivity extends AppCompatActivity implements LocationLis
 
             imgPhotoActive.setImageResource(R.drawable.ic_check_circle_green_24dp);
             Bitmap_Image = bos.toByteArray();
-            btnPicture.setImageBitmap(bitmap);
-            imagePreview.setVisibility(View.VISIBLE);
+            //btnPicture.setImageBitmap(bitmap);
+
+            final Button btnScale = findViewById(R.id.btnScale);
+            final float density = getResources().getDisplayMetrics().density;
+
+            if (Bitmap_Image != null && Bitmap_Image.length > 0) {
+                final Bitmap bmp = BitmapFactory.decodeByteArray(Bitmap_Image, 0, Bitmap_Image.length);
+                final int inHeight = bmp.getHeight();
+                final int inWidth = bmp.getWidth();
+                btnPicture.setScaleType(ImageView.ScaleType.CENTER_CROP);
+
+                if (inWidth > inHeight) {
+                    btnScale.setVisibility(View.GONE);
+                } else {
+                    btnScale.setVisibility(View.VISIBLE);
+                }
+
+                btnPicture.setImageBitmap(bmp);
+                btnPicture.setVisibility(View.VISIBLE);
+
+                btnScale.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        if (btnPicture.getScaleType().equals(ImageView.ScaleType.CENTER_CROP)) {
+                            btnPicture.getLayoutParams().height = Math.round((float) inHeight * density);
+                            btnPicture.setScaleType(ImageView.ScaleType.FIT_XY);
+                        } else {
+                            btnPicture.getLayoutParams().height = Math.round((float) 200 * density);
+                            btnPicture.setScaleType(ImageView.ScaleType.CENTER_CROP);
+                        }
+                    }
+                });
+
+
+            } else {
+                btnPicture.setVisibility(View.GONE);
+                btnScale.setVisibility(View.GONE);
+            }
+
+
+            itemConstraintLayout.setVisibility(View.VISIBLE);
             txtAddPhoto.setText(getResources().getString(R.string.PhotoTitleUpdate));
             imageSet = true;
         }
