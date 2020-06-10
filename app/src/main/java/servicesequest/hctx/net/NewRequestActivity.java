@@ -190,7 +190,7 @@ public class NewRequestActivity extends AppCompatActivity implements LocationLis
 
         Places.initialize(getApplicationContext(), getString(R.string.google_maps_key));
 
-
+        StartLocation();
 
 
         placesClient = Places.createClient(this);
@@ -344,7 +344,7 @@ public class NewRequestActivity extends AppCompatActivity implements LocationLis
             }
         });
 
-        StartLocation();
+
 
         // Obtain the Custom GoogleMapWithScrollFix and get notified when the map is ready to be used.
         //So map can work with scroll
@@ -890,13 +890,11 @@ public class NewRequestActivity extends AppCompatActivity implements LocationLis
         mapsearch = true;
     }
 
-
     @Override
     public void onLocationChanged(Location location) {
         double currentLatitude = location.getLatitude();
         double currentLongitude = location.getLongitude();
         myLocation = new LatLng(currentLatitude, currentLongitude);
-
         fusedLocationProvider.disconnect();
         initMap();
         getAddress();
@@ -906,19 +904,28 @@ public class NewRequestActivity extends AppCompatActivity implements LocationLis
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         for (String permission : permissions) {
             if (ActivityCompat.shouldShowRequestPermissionRationale(this, permission)) {
-                Toast.makeText(NewRequestActivity.this, R.string.requestPermissions, Toast.LENGTH_SHORT).show();
+                if (permission.equals("android.permission.CAMERA")) {
+                    Toast.makeText(NewRequestActivity.this, R.string.requestCameraPermissions, Toast.LENGTH_SHORT).show();
+                }
+                else if (permission.equals("android.permission.ACCESS_FINE_LOCATION")) {
+                    Toast.makeText(NewRequestActivity.this, R.string.requestLocationPermissions, Toast.LENGTH_SHORT).show();
+                }
+                else if (permission.equals("android.permission.WRITE_EXTERNAL_STORAGE")) {
+                    Toast.makeText(NewRequestActivity.this, R.string.requestStoragePermissions, Toast.LENGTH_SHORT).show();
+                }
                 //Log.e("denied", permission);  //denied
             } else {
                 if (ActivityCompat.checkSelfPermission(this, permission) == PackageManager.PERMISSION_GRANTED) {
-                    System.out.println("######################  allowed:" + permission);
+
                     if (permission.equals("android.permission.CAMERA")){
                         CameraPopUp(true);
                     }
+                    else if (permission.equals("android.permission.ACCESS_FINE_LOCATION"))
+                    {
+                        StartLocation();
+                    }
 
                 } else {
-                    //Log.e("set to never ask again", permission); //set to never ask again
-                    //if (permission.equals("android.permission.CAMERA"))
-
                     //System.out.println("######################  don't ask:" + permission);
                     Toast.makeText(NewRequestActivity.this, R.string.requestPermissionsDontAsk, Toast.LENGTH_SHORT).show();
                 }

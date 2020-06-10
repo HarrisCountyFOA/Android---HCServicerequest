@@ -50,9 +50,9 @@ public class AppPermission {
             if (camera != PackageManager.PERMISSION_GRANTED) {
                 listPermissionsNeeded.add(android.Manifest.permission.CAMERA);
             }
-           // if (storage != PackageManager.PERMISSION_GRANTED) {
-               // listPermissionsNeeded.add(android.Manifest.permission.WRITE_EXTERNAL_STORAGE);
-            //}
+           if (storage != PackageManager.PERMISSION_GRANTED) {
+                listPermissionsNeeded.add(android.Manifest.permission.WRITE_EXTERNAL_STORAGE);
+            }
             if (!listPermissionsNeeded.isEmpty()) {
                 ActivityCompat.requestPermissions((Activity) context, listPermissionsNeeded.toArray(new String[listPermissionsNeeded.size()]), REQUEST_ID_MULTIPLE_PERMISSIONS);
                 return false;
