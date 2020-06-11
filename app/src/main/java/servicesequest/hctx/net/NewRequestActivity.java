@@ -535,11 +535,15 @@ public class NewRequestActivity extends AppCompatActivity implements LocationLis
 
         if (!Network.isOnline(NewRequestActivity.this)) {
             Toast.makeText(NewRequestActivity.this, R.string.err_network, Toast.LENGTH_LONG).show();
-
             return;
         }
 
         if (!Validation()) {
+
+            if (Precinct.equals("0")){
+                Toast.makeText(getApplicationContext(), getResources().getString(R.string.ErrInvalidHarrisCountyAddress), Toast.LENGTH_LONG).show();
+                return;
+            }
 
             dbHelper = new ServiceRequestDbHelper(this);
             manager = new RequestDataManager();
@@ -594,6 +598,7 @@ public class NewRequestActivity extends AppCompatActivity implements LocationLis
 
         if (spinnerRequest.getSelectedItemPosition() <= 0 || RequestType == null || RequestTypeValue == null) {
             ((TextView) spinnerRequest.getSelectedView()).setError(getResources().getString(R.string.ErrType));
+            results = true;
         }
 
         if (txtDescription.getText().toString().trim().length() == 0) {
@@ -822,6 +827,8 @@ public class NewRequestActivity extends AppCompatActivity implements LocationLis
 
                     Precinct = getPrecinct(RequestTypeSet.requestTypeSet.get(1).Name);
 
+                    System.out.println("######################  Precinct:" + Precinct);
+
                     if (!Precinct.equals("0")) {
                         ContactDataManager conManager = new ContactDataManager();
                         dbHelper = new ServiceRequestDbHelper(getApplicationContext());
@@ -847,7 +854,8 @@ public class NewRequestActivity extends AppCompatActivity implements LocationLis
 
                     // SubmitAction = true;
                 } else {
-
+                    Precinct = "0";
+                    cmView.setVisibility(View.GONE);
                     Toast.makeText(getApplicationContext(), getResources().getString(R.string.ErrInvalidHarrisCountyAddress), Toast.LENGTH_LONG).show();
                 }
                 //  txtAddress.setText(FullAddress);
