@@ -25,6 +25,11 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
+
+
+        <activity android:name="servicesequest.hctx.net.map" android:theme="@style/AppTheme.NoActionBar"></activity>
+
+
         <activity android:name=".NewRequestActivity">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
