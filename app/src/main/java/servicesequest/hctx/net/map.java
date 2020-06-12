@@ -61,6 +61,7 @@ import com.mapbox.mapboxsdk.maps.OnMapReadyCallback;
 import com.mapbox.mapboxsdk.maps.Style;
 import com.mapbox.mapboxsdk.plugins.annotation.SymbolManager;
 import com.mapbox.mapboxsdk.plugins.annotation.Symbol;
+import com.mapbox.mapboxsdk.style.layers.PropertyFactory;
 import com.mapbox.mapboxsdk.style.layers.SymbolLayer;
 import com.mapbox.mapboxsdk.style.sources.GeoJsonSource;
 
@@ -115,6 +116,8 @@ public class map extends AppCompatActivity implements
     private RecyclerView recyclerView;
     private AnimatorSet animatorSet;
     private static final long CAMERA_ANIMATION_TIME = 1950;
+    private ValueAnimator markerAnimator;
+    private boolean markerSelected = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -271,6 +274,13 @@ public class map extends AppCompatActivity implements
                         iconAllowOverlap(true),
                         iconOffset(new Float[]{0f, -8f})
                 ));
+
+        loadedStyle.addSource(new GeoJsonSource("selected-marker"));
+
+        loadedStyle.addLayer(new SymbolLayer("selected-marker-layer", "selected-marker")
+                .withProperties(PropertyFactory.iconImage(MARKER_IMAGE_ID),
+                        iconAllowOverlap(true),
+                        iconOffset(new Float[]{0f, -9f})));
     }
 
     private void setupRecyclerView(List<Request> results) {
@@ -332,25 +342,55 @@ public class map extends AppCompatActivity implements
     private boolean handleClickIcon(PointF screenPoint) {
 
         List<Feature> features = mapboxMap.queryRenderedFeatures(screenPoint, MARKER_LAYER_ID);
-        if (!features.isEmpty()) {
-            String name = features.get(0).getStringProperty(PROPERTY_NAME);
-            List<Feature> featureList = featureCollection.features();
-            if (featureList != null) {
-                for (int i = 0; i < featureList.size(); i++) {
-                    if (featureList.get(i).getStringProperty(PROPERTY_NAME).equals(name)) {
-                        if (featureSelectStatus(i)) {
-                            setFeatureSelectState(featureList.get(i), false);
-                        } else {
-                            setSelected(i);
+
+        Style style = mapboxMap.getStyle();
+        if (style != null) {
+            final SymbolLayer selectedMarkerSymbolLayer =
+                    (SymbolLayer) style.getLayer("selected-marker-layer");
+
+            GeoJsonSource source = style.getSourceAs("selected-marker");
+
+
+            if (!features.isEmpty()) {
+                String name = features.get(0).getStringProperty(PROPERTY_NAME);
+                List<Feature> featureList = featureCollection.features();
+                if (featureList != null) {
+                    for (int i = 0; i < featureList.size(); i++) {
+                        if (featureList.get(i).getStringProperty(PROPERTY_NAME).equals(name)) {
+                            if (featureSelectStatus(i)) {
+                                setFeatureSelectState(featureList.get(i), false);
+                                if (source != null) {
+                                    source.setGeoJson(FeatureCollection.fromFeatures(
+                                            new Feature[]{Feature.fromGeometry(featureCollection.features().get(i).geometry())}));
+                                    deselectMarker(selectedMarkerSymbolLayer);
+                                }
+                                recyclerView.setVisibility(View.GONE);
+                            } else {
+                                setSelected(i);
+                                if (source != null) {
+                                    source.setGeoJson(FeatureCollection.fromFeatures(
+                                            new Feature[]{Feature.fromGeometry(featureCollection.features().get(i).geometry())}));
+                                    selectMarker(selectedMarkerSymbolLayer);
+                                }
+                            }
                         }
                     }
                 }
+                return true;
+            } else {
+                if(featureCollection != null)
+                {
+                    for (Feature singleFeature : featureCollection.features()) {
+                        singleFeature.addBooleanProperty(PROPERTY_SELECTED, false);
+                    }
+                }
+                recyclerView.setVisibility(View.GONE);
+                deselectMarker(selectedMarkerSymbolLayer);
+                return false;
             }
-            return true;
-        } else {
-            recyclerView.setVisibility(View.GONE);
-            return false;
         }
+
+        return false;
     }
 
     /**
@@ -395,8 +435,42 @@ public class map extends AppCompatActivity implements
 
             animateCameraToSelection(feature);
             setupRecyclerView(r);
+
             refreshSource();
         }
+    }
+
+    private void selectMarker(final SymbolLayer iconLayer) {
+        markerAnimator = new ValueAnimator();
+        markerAnimator.setObjectValues(1f, 2f);
+        markerAnimator.setDuration(300);
+        markerAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+
+            @Override
+            public void onAnimationUpdate(ValueAnimator animator) {
+                iconLayer.setProperties(
+                        PropertyFactory.iconSize((float) animator.getAnimatedValue())
+                );
+            }
+        });
+        markerAnimator.start();
+        markerSelected = true;
+    }
+
+    private void deselectMarker(final SymbolLayer iconLayer) {
+        markerAnimator.setObjectValues(2f, 1f);
+        markerAnimator.setDuration(300);
+        markerAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+
+            @Override
+            public void onAnimationUpdate(ValueAnimator animator) {
+                iconLayer.setProperties(
+                        PropertyFactory.iconSize((float) animator.getAnimatedValue())
+                );
+            }
+        });
+        markerAnimator.start();
+        markerSelected = false;
     }
 
 
