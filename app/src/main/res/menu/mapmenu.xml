@@ -21,4 +21,8 @@
         android:id="@+id/map_box"
         android:title="@string/mapbox_map"
         app:showAsAction="never" />
+    <item
+        android:id="@+id/google_map"
+        android:title="@string/google_map"
+        app:showAsAction="never" />
 </menu>

@@ -286,6 +286,7 @@ YOU EXPRESSLY UNDERSTAND AND AGREE THAT YOUR USE OF THE APPLICATION IS AT YOUR S
   <string name="yes">Yes</string>
   <string name="no">No</string>
     <string name="mapbox_map">Map Box Map</string>
+    <string name="google_map">Google Map</string>
     <!-- END NEW REQUEST -->
 
 </resources>

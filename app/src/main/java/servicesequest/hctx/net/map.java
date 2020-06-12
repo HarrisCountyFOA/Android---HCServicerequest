@@ -5,9 +5,14 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.content.ContextCompat;
+import androidx.interpolator.view.animation.FastOutSlowInInterpolator;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.animation.Animator;
+import android.animation.AnimatorSet;
+import android.animation.TypeEvaluator;
+import android.animation.ValueAnimator;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
@@ -45,6 +50,8 @@ import com.mapbox.geojson.FeatureCollection;
 import com.mapbox.geojson.Point;
 import com.mapbox.mapboxsdk.Mapbox;
 import com.mapbox.mapboxsdk.annotations.BubbleLayout;
+import com.mapbox.mapboxsdk.camera.CameraPosition;
+import com.mapbox.mapboxsdk.camera.CameraUpdateFactory;
 import com.mapbox.mapboxsdk.geometry.LatLng;
 import com.mapbox.mapboxsdk.maps.MapView;
 import com.mapbox.mapboxsdk.maps.MapboxMap;
@@ -106,6 +113,8 @@ public class map extends AppCompatActivity implements
     private GeoJsonSource source;
     private FeatureCollection featureCollection;
     private RecyclerView recyclerView;
+    private AnimatorSet animatorSet;
+    private static final long CAMERA_ANIMATION_TIME = 1950;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -384,12 +393,86 @@ public class map extends AppCompatActivity implements
             List<Request> r = new ArrayList<>();
             r.add(R);
 
+            animateCameraToSelection(feature);
             setupRecyclerView(r);
-
-
             refreshSource();
         }
     }
+
+
+    /**
+     * Animate camera to a feature.
+     *
+     * @param feature the feature to animate to
+     */
+    private void animateCameraToSelection(Feature feature, double newZoom) {
+        CameraPosition cameraPosition = mapboxMap.getCameraPosition();
+
+        if (animatorSet != null) {
+            animatorSet.cancel();
+        }
+
+        animatorSet = new AnimatorSet();
+        animatorSet.playTogether(
+                createLatLngAnimator(cameraPosition.target, convertToLatLng(feature)),
+                createZoomAnimator(cameraPosition.zoom, newZoom)
+        );
+        animatorSet.start();
+    }
+
+    private void animateCameraToSelection(Feature feature) {
+        double zoom = 17;
+        animateCameraToSelection(feature, zoom);
+    }
+
+    private LatLng convertToLatLng(Feature feature) {
+        Point symbolPoint = (Point) feature.geometry();
+        return new LatLng(symbolPoint.latitude(), symbolPoint.longitude());
+    }
+
+    private Animator createLatLngAnimator(LatLng currentPosition, LatLng targetPosition) {
+        ValueAnimator latLngAnimator = ValueAnimator.ofObject(new LatLngEvaluator(), currentPosition, targetPosition);
+        latLngAnimator.setDuration(CAMERA_ANIMATION_TIME);
+        latLngAnimator.setInterpolator(new FastOutSlowInInterpolator());
+        latLngAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+            @Override
+            public void onAnimationUpdate(ValueAnimator animation) {
+                mapboxMap.moveCamera(CameraUpdateFactory.newLatLng((LatLng) animation.getAnimatedValue()));
+            }
+        });
+        return latLngAnimator;
+    }
+
+    private Animator createZoomAnimator(double currentZoom, double targetZoom) {
+        ValueAnimator zoomAnimator = ValueAnimator.ofFloat((float) currentZoom, (float) targetZoom);
+        zoomAnimator.setDuration(CAMERA_ANIMATION_TIME);
+        zoomAnimator.setInterpolator(new FastOutSlowInInterpolator());
+        zoomAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+            @Override
+            public void onAnimationUpdate(ValueAnimator animation) {
+                mapboxMap.moveCamera(CameraUpdateFactory.zoomTo((Float) animation.getAnimatedValue()));
+            }
+        });
+        return zoomAnimator;
+    }
+
+    /**
+     * Helper class to evaluate LatLng objects with a ValueAnimator
+     */
+    private static class LatLngEvaluator implements TypeEvaluator<LatLng> {
+
+        private final LatLng latLng = new LatLng();
+
+        @Override
+        public LatLng evaluate(float fraction, LatLng startValue, LatLng endValue) {
+            latLng.setLatitude(startValue.getLatitude()
+                    + ((endValue.getLatitude() - startValue.getLatitude()) * fraction));
+            latLng.setLongitude(startValue.getLongitude()
+                    + ((endValue.getLongitude() - startValue.getLongitude()) * fraction));
+            return latLng;
+        }
+    }
+
 
     /**
      * Selects the state of a feature
@@ -508,171 +591,171 @@ public class map extends AppCompatActivity implements
         }
     }
 
-    /**
-     * AsyncTask to generate Bitmap from Views to be used as iconImage in a SymbolLayer.
-     * <p>
-     * Call be optionally be called to update the underlying data source after execution.
-     * </p>
-     * <p>
-     * Generating Views on background thread since we are not going to be adding them to the view hierarchy.
-     * </p>
-     */
-    private static class GenerateViewIconTask extends AsyncTask<FeatureCollection, Void, HashMap<String, Bitmap>> {
-
-        private final HashMap<String, View> viewMap = new HashMap<>();
-        private final WeakReference<map> activityRef;
-        private final boolean refreshSource;
-
-        GenerateViewIconTask(map activity, boolean refreshSource) {
-            this.activityRef = new WeakReference<>(activity);
-            this.refreshSource = refreshSource;
-        }
-
-        GenerateViewIconTask(map activity) {
-            this(activity, false);
-        }
-
-        @SuppressWarnings("WrongThread")
-        @Override
-        protected HashMap<String, Bitmap> doInBackground(FeatureCollection... params) {
-            map activity = activityRef.get();
-            if (activity != null) {
-                HashMap<String, Bitmap> imagesMap = new HashMap<>();
-                LayoutInflater inflater = LayoutInflater.from(activity);
-
-                FeatureCollection featureCollection = params[0];
-
-                for (Feature feature : featureCollection.features()) {
-
-                    View bubbleLayout = (View) LayoutInflater.from(activity)
-                            .inflate(R.layout.activity_request_infolist, null);
-
-                    String id = feature.getStringProperty("_id");
-
-                    String name = feature.getStringProperty("Image_Name");
-                    TextView titleTextView = bubbleLayout.findViewById(R.id.txvName);
-                    titleTextView.setText(name);
-
-                    String adds = feature.getStringProperty("FullAddress");
-                    TextView descriptionTextView = bubbleLayout.findViewById(R.id.txvaddress);
-                    descriptionTextView.setText(adds);
-
-                    String image = feature.getStringProperty("Image");
-                    ImageView avatar = (ImageView) bubbleLayout.findViewById(R.id.avatar);
-
-                    if (image != "") {
-                        String[] split = image.substring(1, image.length() - 1).split(", ");
-                        byte[] array = new byte[split.length];
-                        for (int i = 0; i < split.length; i++) {
-                            array[i] = Byte.parseByte(split[i]);
-                        }
-
-                        Bitmap bmp = BitmapFactory.decodeByteArray(array, 0, array.length);
-                        avatar.setImageBitmap(bmp);
-                        avatar.setScaleType(ImageView.ScaleType.CENTER_CROP);
-                        avatar.setVisibility(View.VISIBLE);
-
-                    } else {
-                        avatar.setVisibility(View.GONE);
-                    }
-
-                    String date = feature.getStringProperty("Date");
-                    TextView txvDate = (TextView) bubbleLayout.findViewById(R.id.txvDate);
-                    txvDate.setText(date);
-
-                    String time = feature.getStringProperty("Time");
-                    TextView txvTime = (TextView) bubbleLayout.findViewById(R.id.txvTime);
-                    txvTime.setText(time);
-
-//                    DisplayMetrics displayMetrics = new DisplayMetrics();
-//                    (activity).getWindowManager()
-//                            .getDefaultDisplay()
-//                            .getMetrics(displayMetrics);
+//    /**
+//     * AsyncTask to generate Bitmap from Views to be used as iconImage in a SymbolLayer.
+//     * <p>
+//     * Call be optionally be called to update the underlying data source after execution.
+//     * </p>
+//     * <p>
+//     * Generating Views on background thread since we are not going to be adding them to the view hierarchy.
+//     * </p>
+//     */
+//    private static class GenerateViewIconTask extends AsyncTask<FeatureCollection, Void, HashMap<String, Bitmap>> {
 //
-//                    int measureSpec = View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED);
-//                    bubbleLayout.measure(displayMetrics.widthPixels, 400);
+//        private final HashMap<String, View> viewMap = new HashMap<>();
+//        private final WeakReference<map> activityRef;
+//        private final boolean refreshSource;
 //
-//                    float measuredWidth = bubbleLayout.getMeasuredWidth();
+//        GenerateViewIconTask(map activity, boolean refreshSource) {
+//            this.activityRef = new WeakReference<>(activity);
+//            this.refreshSource = refreshSource;
+//        }
 //
-//                    bubbleLayout.setArrowPosition(measuredWidth / 2 - 5);
-
-
-                    Bitmap bitmap = loadBitmapFromView(bubbleLayout);
-                    //SymbolGenerator.generate(bubbleLayout, displayMetrics.widthPixels);
-                    imagesMap.put(id, bitmap);
-                    // viewMap.put(id, bubbleLayout);
-                }
-
-                return imagesMap;
-            } else {
-                return null;
-            }
-        }
-
-        public static Bitmap loadBitmapFromView(View v) {
-            if (v.getMeasuredHeight() <= 0) {
-
-                int specWidth = View.MeasureSpec.makeMeasureSpec(0 /* any */, View.MeasureSpec.UNSPECIFIED);
-                v.measure(specWidth, specWidth);
-                int questionWidth = v.getMeasuredWidth();
-                int measuredHeight = v.getMeasuredHeight();
-
-                v.measure(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-                Bitmap b = Bitmap.createBitmap(v.getWidth(), v.getHeight(), Bitmap.Config.ARGB_8888);
-                Canvas c = new Canvas(b);
-                v.layout(0, 0, questionWidth, measuredHeight);
-                v.draw(c);
-                return b;
-            } else {
-                Bitmap b = Bitmap.createBitmap(v.getLayoutParams().width, v.getLayoutParams().height, Bitmap.Config.ARGB_8888);
-                Canvas c = new Canvas(b);
-                v.layout(v.getLeft(), v.getTop(), v.getRight(), v.getBottom());
-                v.draw(c);
-                return b;
-            }
-        }
-
-        @Override
-        protected void onPostExecute(HashMap<String, Bitmap> bitmapHashMap) {
-            super.onPostExecute(bitmapHashMap);
-            map activity = activityRef.get();
-            if (activity != null && bitmapHashMap != null) {
-                activity.setImageGenResults(bitmapHashMap);
-                if (refreshSource) {
-                    activity.refreshSource();
-                }
-            }
-            //Toast.makeText(activity, R.string.tap_on_marker_instruction, Toast.LENGTH_SHORT).show();
-        }
-    }
-
-    /**
-     * Utility class to generate Bitmaps for Symbol.
-     */
-    private static class SymbolGenerator {
-
-        /**
-         * Generate a Bitmap from an Android SDK View.
-         *
-         * @param view the View to be drawn to a Bitmap
-         * @return the generated bitmap
-         */
-        static Bitmap generate(@NonNull View view, int width) {
-            int measureSpec = View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED);
-            view.measure(measureSpec, measureSpec);
-
-            int measuredWidth = (width - 100);
-            //view.getMeasuredWidth();
-            int measuredHeight = view.getMeasuredHeight();
-
-            view.layout(0, 0, measuredWidth, measuredHeight);
-            Bitmap bitmap = Bitmap.createBitmap(measuredWidth, measuredHeight, Bitmap.Config.ARGB_8888);
-            bitmap.eraseColor(Color.TRANSPARENT);
-            Canvas canvas = new Canvas(bitmap);
-            view.draw(canvas);
-            return bitmap;
-        }
-    }
+//        GenerateViewIconTask(map activity) {
+//            this(activity, false);
+//        }
+//
+//        @SuppressWarnings("WrongThread")
+//        @Override
+//        protected HashMap<String, Bitmap> doInBackground(FeatureCollection... params) {
+//            map activity = activityRef.get();
+//            if (activity != null) {
+//                HashMap<String, Bitmap> imagesMap = new HashMap<>();
+//                LayoutInflater inflater = LayoutInflater.from(activity);
+//
+//                FeatureCollection featureCollection = params[0];
+//
+//                for (Feature feature : featureCollection.features()) {
+//
+//                    View bubbleLayout = (View) LayoutInflater.from(activity)
+//                            .inflate(R.layout.activity_request_infolist, null);
+//
+//                    String id = feature.getStringProperty("_id");
+//
+//                    String name = feature.getStringProperty("Image_Name");
+//                    TextView titleTextView = bubbleLayout.findViewById(R.id.txvName);
+//                    titleTextView.setText(name);
+//
+//                    String adds = feature.getStringProperty("FullAddress");
+//                    TextView descriptionTextView = bubbleLayout.findViewById(R.id.txvaddress);
+//                    descriptionTextView.setText(adds);
+//
+//                    String image = feature.getStringProperty("Image");
+//                    ImageView avatar = (ImageView) bubbleLayout.findViewById(R.id.avatar);
+//
+//                    if (image != "") {
+//                        String[] split = image.substring(1, image.length() - 1).split(", ");
+//                        byte[] array = new byte[split.length];
+//                        for (int i = 0; i < split.length; i++) {
+//                            array[i] = Byte.parseByte(split[i]);
+//                        }
+//
+//                        Bitmap bmp = BitmapFactory.decodeByteArray(array, 0, array.length);
+//                        avatar.setImageBitmap(bmp);
+//                        avatar.setScaleType(ImageView.ScaleType.CENTER_CROP);
+//                        avatar.setVisibility(View.VISIBLE);
+//
+//                    } else {
+//                        avatar.setVisibility(View.GONE);
+//                    }
+//
+//                    String date = feature.getStringProperty("Date");
+//                    TextView txvDate = (TextView) bubbleLayout.findViewById(R.id.txvDate);
+//                    txvDate.setText(date);
+//
+//                    String time = feature.getStringProperty("Time");
+//                    TextView txvTime = (TextView) bubbleLayout.findViewById(R.id.txvTime);
+//                    txvTime.setText(time);
+//
+////                    DisplayMetrics displayMetrics = new DisplayMetrics();
+////                    (activity).getWindowManager()
+////                            .getDefaultDisplay()
+////                            .getMetrics(displayMetrics);
+////
+////                    int measureSpec = View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED);
+////                    bubbleLayout.measure(displayMetrics.widthPixels, 400);
+////
+////                    float measuredWidth = bubbleLayout.getMeasuredWidth();
+////
+////                    bubbleLayout.setArrowPosition(measuredWidth / 2 - 5);
+//
+//
+//                    Bitmap bitmap = loadBitmapFromView(bubbleLayout);
+//                    //SymbolGenerator.generate(bubbleLayout, displayMetrics.widthPixels);
+//                    imagesMap.put(id, bitmap);
+//                    // viewMap.put(id, bubbleLayout);
+//                }
+//
+//                return imagesMap;
+//            } else {
+//                return null;
+//            }
+//        }
+//
+//        public static Bitmap loadBitmapFromView(View v) {
+//            if (v.getMeasuredHeight() <= 0) {
+//
+//                int specWidth = View.MeasureSpec.makeMeasureSpec(0 /* any */, View.MeasureSpec.UNSPECIFIED);
+//                v.measure(specWidth, specWidth);
+//                int questionWidth = v.getMeasuredWidth();
+//                int measuredHeight = v.getMeasuredHeight();
+//
+//                v.measure(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+//                Bitmap b = Bitmap.createBitmap(v.getWidth(), v.getHeight(), Bitmap.Config.ARGB_8888);
+//                Canvas c = new Canvas(b);
+//                v.layout(0, 0, questionWidth, measuredHeight);
+//                v.draw(c);
+//                return b;
+//            } else {
+//                Bitmap b = Bitmap.createBitmap(v.getLayoutParams().width, v.getLayoutParams().height, Bitmap.Config.ARGB_8888);
+//                Canvas c = new Canvas(b);
+//                v.layout(v.getLeft(), v.getTop(), v.getRight(), v.getBottom());
+//                v.draw(c);
+//                return b;
+//            }
+//        }
+//
+//        @Override
+//        protected void onPostExecute(HashMap<String, Bitmap> bitmapHashMap) {
+//            super.onPostExecute(bitmapHashMap);
+//            map activity = activityRef.get();
+//            if (activity != null && bitmapHashMap != null) {
+//                activity.setImageGenResults(bitmapHashMap);
+//                if (refreshSource) {
+//                    activity.refreshSource();
+//                }
+//            }
+//            //Toast.makeText(activity, R.string.tap_on_marker_instruction, Toast.LENGTH_SHORT).show();
+//        }
+//    }
+//
+//    /**
+//     * Utility class to generate Bitmaps for Symbol.
+//     */
+//    private static class SymbolGenerator {
+//
+//        /**
+//         * Generate a Bitmap from an Android SDK View.
+//         *
+//         * @param view the View to be drawn to a Bitmap
+//         * @return the generated bitmap
+//         */
+//        static Bitmap generate(@NonNull View view, int width) {
+//            int measureSpec = View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED);
+//            view.measure(measureSpec, measureSpec);
+//
+//            int measuredWidth = (width - 100);
+//            //view.getMeasuredWidth();
+//            int measuredHeight = view.getMeasuredHeight();
+//
+//            view.layout(0, 0, measuredWidth, measuredHeight);
+//            Bitmap bitmap = Bitmap.createBitmap(measuredWidth, measuredHeight, Bitmap.Config.ARGB_8888);
+//            bitmap.eraseColor(Color.TRANSPARENT);
+//            Canvas canvas = new Canvas(bitmap);
+//            view.draw(canvas);
+//            return bitmap;
+//        }
+//    }
 
     BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener = new BottomNavigationView.OnNavigationItemSelectedListener() {
 
@@ -718,12 +801,18 @@ public class map extends AppCompatActivity implements
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.mapmenu, menu);
+
+        MenuItem item = menu.findItem(R.id.map_box);
+        item.setVisible(false);
+
         return true;
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         // Change the map type based on the user's selection.
+        recyclerView.setVisibility(View.GONE);
+
         switch (item.getItemId()) {
             case R.id.normal_map:
                 mapboxMap.setStyle(Style.MAPBOX_STREETS, new Style.OnStyleLoaded() {
@@ -764,6 +853,11 @@ public class map extends AppCompatActivity implements
 
                     }
                 });
+                return true;
+            case R.id.google_map:
+                Intent ti = new Intent(getApplicationContext(), MapViewActivity.class);
+                ti.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                startActivity(ti);
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
