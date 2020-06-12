@@ -160,7 +160,7 @@ public class NewRequestActivity extends AppCompatActivity implements LocationLis
     TextView text8;
     CardView cmView;
 
-    private GoogleMap mMap;
+    private GoogleMap mMapMni;
     boolean mapsearch = false;
     FusedLocationProvider fusedLocationProvider;
     InputMethodManager inputManager;
@@ -350,15 +350,15 @@ public class NewRequestActivity extends AppCompatActivity implements LocationLis
 
         // Obtain the Custom GoogleMapWithScrollFix and get notified when the map is ready to be used.
         //So map can work with scroll
-        ((GoogleMapWithScrollFix) getSupportFragmentManager().findFragmentById(R.id.map)).getMapAsync(new OnMapReadyCallback() {
+        ((GoogleMapWithScrollFix) getSupportFragmentManager().findFragmentById(R.id.mapMini)).getMapAsync(new OnMapReadyCallback() {
             @Override
             public void onMapReady(GoogleMap googleMap) {
-                mMap = googleMap;
-                mMap.getUiSettings().setZoomControlsEnabled(true);
-                mMap.getUiSettings().setCompassEnabled(true);
+                mMapMni = googleMap;
+                mMapMni.getUiSettings().setZoomControlsEnabled(true);
+                mMapMni.getUiSettings().setCompassEnabled(true);
 
                 final ScrollView mScrollView1 = findViewById(R.id.ScrollView01);
-                ((GoogleMapWithScrollFix) getSupportFragmentManager().findFragmentById(R.id.map)).setListener(new GoogleMapWithScrollFix.OnTouchListener() {
+                ((GoogleMapWithScrollFix) getSupportFragmentManager().findFragmentById(R.id.mapMini)).setListener(new GoogleMapWithScrollFix.OnTouchListener() {
                     @Override
                     public void onTouch() {
                         //Disable scrolling of outside scroll view
@@ -533,6 +533,7 @@ public class NewRequestActivity extends AppCompatActivity implements LocationLis
 
     private void saveRequest() {
 
+
         if (!Network.isOnline(NewRequestActivity.this)) {
             Toast.makeText(NewRequestActivity.this, R.string.err_network, Toast.LENGTH_LONG).show();
             return;
@@ -571,7 +572,8 @@ public class NewRequestActivity extends AppCompatActivity implements LocationLis
                         Toast.makeText(getApplicationContext(), getResources().getString(R.string.RequestSuccess), Toast.LENGTH_LONG).show();
 
                         Intent intent = new Intent(NewRequestActivity.this, MainActivity.class);
-                        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                        finish();
                         startActivity(intent);
 
                     } else {
@@ -896,14 +898,14 @@ public class NewRequestActivity extends AppCompatActivity implements LocationLis
     private void initMap()
     {
         LatLng hc = new LatLng(myLocation.latitude, myLocation.longitude);
-        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(hc, 15.0f));
-        mMap.clear();
-        Marker perth = mMap.addMarker(new MarkerOptions().position(hc).draggable(true));
+        mMapMni.moveCamera(CameraUpdateFactory.newLatLngZoom(hc, 15.0f));
+        mMapMni.clear();
+        Marker perth = mMapMni.addMarker(new MarkerOptions().position(hc).draggable(true));
         MarkerDrag();
     }
 
     public void MarkerDrag() {
-        mMap.setOnMarkerDragListener(new GoogleMap.OnMarkerDragListener() {
+        mMapMni.setOnMarkerDragListener(new GoogleMap.OnMarkerDragListener() {
             @Override
             public void onMarkerDragStart(Marker arg0) {
                 // TODO Auto-generated method stub
