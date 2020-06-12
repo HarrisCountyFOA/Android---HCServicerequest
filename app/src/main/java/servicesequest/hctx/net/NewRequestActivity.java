@@ -625,6 +625,9 @@ public class NewRequestActivity extends AppCompatActivity implements LocationLis
                             if (!mapsearch) {
                                 getPlacePredictions(s.toString());
 
+                                imbtMyLocation.setClickable(true);
+                                imbtMyLocation.setColorFilter(getResources().getColor(R.color.ColorPrimaryText));
+
                                 if (viewAnimator.getVisibility() == View.GONE) {
                                     viewAnimator.setVisibility(View.VISIBLE);
                                 }
@@ -776,6 +779,7 @@ public class NewRequestActivity extends AppCompatActivity implements LocationLis
                 adapter.setPredictions(predictions);
                 viewAnimator.setDisplayedChild(predictions.isEmpty() ? 0 : 1);
 
+
             }
         }).addOnFailureListener(new OnFailureListener() {
             @Override
@@ -910,6 +914,9 @@ public class NewRequestActivity extends AppCompatActivity implements LocationLis
             public void onMarkerDragEnd(Marker arg0) {
                 myLocation = arg0.getPosition();
                 getAddress();
+
+                imbtMyLocation.setClickable(true);
+                imbtMyLocation.setColorFilter(getResources().getColor(R.color.ColorPrimaryText));
             }
 
             @Override
@@ -947,6 +954,9 @@ public class NewRequestActivity extends AppCompatActivity implements LocationLis
         fusedLocationProvider.disconnect();
         initMap();
         getAddress();
+
+        imbtMyLocation.setClickable(false);
+        imbtMyLocation.setColorFilter(getResources().getColor(R.color.ColorPrimaryIcon));
     }
 
     @Override
