@@ -92,6 +92,7 @@ public class MapViewActivity extends AppCompatActivity implements OnMapReadyCall
             @Override
             public void onClick(View view) {
                 Intent ti = new Intent(getApplicationContext(), NewRequestActivity.class);
+                ti.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                 startActivityForResult(ti, 1);
             }
         });
@@ -113,6 +114,9 @@ public class MapViewActivity extends AppCompatActivity implements OnMapReadyCall
 
         MenuItem item = menu.findItem(R.id.google_map);
         item.setVisible(false);
+
+        MenuItem item1 = menu.findItem(R.id.map_box);
+        item1.setVisible(false);
 
         return true;
     }

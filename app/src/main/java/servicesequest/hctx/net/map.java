@@ -458,19 +458,21 @@ public class map extends AppCompatActivity implements
     }
 
     private void deselectMarker(final SymbolLayer iconLayer) {
-        markerAnimator.setObjectValues(2f, 1f);
-        markerAnimator.setDuration(300);
-        markerAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+        if(markerAnimator != null) {
+            markerAnimator.setObjectValues(2f, 1f);
+            markerAnimator.setDuration(300);
+            markerAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
 
-            @Override
-            public void onAnimationUpdate(ValueAnimator animator) {
-                iconLayer.setProperties(
-                        PropertyFactory.iconSize((float) animator.getAnimatedValue())
-                );
-            }
-        });
-        markerAnimator.start();
-        markerSelected = false;
+                @Override
+                public void onAnimationUpdate(ValueAnimator animator) {
+                    iconLayer.setProperties(
+                            PropertyFactory.iconSize((float) animator.getAnimatedValue())
+                    );
+                }
+            });
+            markerAnimator.start();
+            markerSelected = false;
+        }
     }
 
 
@@ -878,6 +880,9 @@ public class map extends AppCompatActivity implements
 
         MenuItem item = menu.findItem(R.id.map_box);
         item.setVisible(false);
+
+        MenuItem item1 = menu.findItem(R.id.google_map);
+        item1.setVisible(false);
 
         return true;
     }
