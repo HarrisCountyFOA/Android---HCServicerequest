@@ -14,6 +14,7 @@
     <string name="title_item_detail">Item Detail</string>
     <string name="title_activity_terms_of_use">TermsOfUseActivity</string>
     <string name="pick_image_intent_text">Choose an image</string>
+  <string name="mapbox_access_token">pk.eyJ1IjoiZ2FuZGhpeWFuZGFwYWxsaSIsImEiOiJja2I5eGNlYjkwaXBkMndscWtodXRvNDR1In0.tPhoYwHNkKgXi9_O04eiPg</string>
     <string name="large_text"> <![CDATA[
        THIS MOBILE APP SHOULD NOT BE USED WHILE OPERATING A MOTOR VEHICLE.
 <p>
@@ -284,6 +285,7 @@ YOU EXPRESSLY UNDERSTAND AND AGREE THAT YOUR USE OF THE APPLICATION IS AT YOUR S
   <string name="gps_msg">Location is disabled, do you want to enable it?</string>
   <string name="yes">Yes</string>
   <string name="no">No</string>
+    <string name="mapbox_map">Map Box Map</string>
     <!-- END NEW REQUEST -->
 
 </resources>

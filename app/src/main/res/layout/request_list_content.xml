@@ -33,6 +33,7 @@
             android:layout_width="40dp"
             android:layout_height="40dp"
             android:layout_margin="5dp"
+            android:visibility="gone"
             app:layout_constraintStart_toStartOf="@+id/avatar"
             app:layout_constraintTop_toTopOf="@+id/avatar"
             android:background="@drawable/ic_swap_vertical_circle_black_24dp" />

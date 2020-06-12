@@ -129,6 +129,11 @@ public class MapViewActivity extends AppCompatActivity implements OnMapReadyCall
             case R.id.terrain_map:
                 mMap.setMapType(GoogleMap.MAP_TYPE_TERRAIN);
                 return true;
+            case R.id.map_box:
+                Intent ti = new Intent(getApplicationContext(), map.class);
+                ti.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                startActivity(ti);
+                return true;
             default:
                 return super.onOptionsItemSelected(item);
         }
