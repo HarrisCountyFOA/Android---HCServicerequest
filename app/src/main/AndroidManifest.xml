@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     package="servicesequest.hctx.net">
     <!--
          The ACCESS_COARSE/FINE_LOCATION permissions are not required to use
@@ -30,7 +31,7 @@
         <activity android:name="servicesequest.hctx.net.map" android:theme="@style/AppTheme.NoActionBar"></activity>
 
 
-        <activity android:name=".NewRequestActivity">
+        <activity android:name=".NewRequestActivity" android:screenOrientation="portrait" tools:ignore="LockedOrientationActivity">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="servicesequest.hctx.net.MainActivity" />
