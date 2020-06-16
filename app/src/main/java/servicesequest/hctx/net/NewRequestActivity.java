@@ -171,6 +171,7 @@ public class NewRequestActivity extends AppCompatActivity implements LocationLis
     Button btnPictureDelete;
     ConstraintLayout itemConstraintLayout;
     ImageButton imbtMyLocation;
+    private ProgressDialog pd;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -280,6 +281,7 @@ public class NewRequestActivity extends AppCompatActivity implements LocationLis
         cmView = findViewById(R.id.cmView);
         cmView.setVisibility(View.GONE);
         itemConstraintLayout.setVisibility(View.GONE);
+
 
         initRecyclerView();
         txtAddPhoto.setOnClickListener(new View.OnClickListener() {
@@ -806,11 +808,12 @@ public class NewRequestActivity extends AppCompatActivity implements LocationLis
 
         return null;
     }
-
+    RequestTypeAsync requestTypeAsyncTask;
     public void AddressCheck() {
-        RequestTypeAsync asyncTask = new RequestTypeAsync(this, myLocation.latitude, myLocation.longitude, new RequestTypeAsync.OnTaskCompleted() {
+        requestTypeAsyncTask = new RequestTypeAsync(this, myLocation.latitude, myLocation.longitude, new RequestTypeAsync.OnTaskCompleted() {
             @Override
             public void taskCompleted(Boolean results) {
+
                 spinnerArrayAdapterRequest.clear();
 
 
@@ -832,8 +835,6 @@ public class NewRequestActivity extends AppCompatActivity implements LocationLis
                     spinnerRequest.setSelection(RequestTypeValuePosition, false);
 
                     Precinct = getPrecinct(RequestTypeSet.requestTypeSet.get(1).Name);
-
-                    System.out.println("######################  Precinct:" + Precinct);
 
                     if (!Precinct.equals("0")) {
                         ContactDataManager conManager = new ContactDataManager();
@@ -872,8 +873,18 @@ public class NewRequestActivity extends AppCompatActivity implements LocationLis
 //                }
             }
         });
-        asyncTask.execute();
+        requestTypeAsyncTask.execute();
     }
+
+    protected void onDestroy() {
+        super.onDestroy();
+
+        //check the state of the task
+        if(requestTypeAsyncTask != null)
+            requestTypeAsyncTask.cancel(true);
+    }
+
+
 
     ///########Close Key Board
     private void closeKeyboard() {
@@ -889,6 +900,12 @@ public class NewRequestActivity extends AppCompatActivity implements LocationLis
                 Network.buildAlertMessageNoGps(NewRequestActivity.this);
                 return;
             }
+
+            pd = new ProgressDialog(NewRequestActivity.this, R.style.MyDialogTheme);
+            pd.setTitle("Loading Address");
+            pd.setMessage("Please wait...");
+            pd.setCancelable(false);
+            pd.show();
 
             fusedLocationProvider = new FusedLocationProvider(NewRequestActivity.this, this);
             fusedLocationProvider.connect();
@@ -948,6 +965,7 @@ public class NewRequestActivity extends AppCompatActivity implements LocationLis
         mapsearch = true;
     }
 
+
     @Override
     public void onLocationChanged(Location location) {
         double currentLatitude = location.getLatitude();
@@ -959,6 +977,8 @@ public class NewRequestActivity extends AppCompatActivity implements LocationLis
 
         imbtMyLocation.setClickable(false);
         imbtMyLocation.setColorFilter(getResources().getColor(R.color.ColorPrimaryIcon));
+
+        pd.dismiss();
     }
 
     @Override
