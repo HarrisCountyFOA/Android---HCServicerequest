@@ -22,6 +22,7 @@ public class ServiceRequestDbHelper extends SQLiteOpenHelper {
         db.execSQL(ServiceRequestDbContract.ProfileEntry.SQL_CREATE_ENTRIES);
         db.execSQL(ServiceRequestDbContract.ContactEntry.SQL_CREATE_ENTRIES);
         db.execSQL(ServiceRequestDbContract.RequestEntry.SQL_CREATE_ENTRIES);
+        db.execSQL(ServiceRequestDbContract.PointEntry.SQL_CREATE_ENTRIES);
 
 //        db.execSQL("INSERT INTO " + ServiceRequestDbContract.ContactEntry.TABLE_NAME + " (" +
 //                ServiceRequestDbContract.ContactEntry.COLUMN_NAME_FIRSTNAME + ", " +
@@ -168,7 +169,8 @@ public class ServiceRequestDbHelper extends SQLiteOpenHelper {
         // to simply to discard the data and start over
         db.execSQL(ServiceRequestDbContract.ProfileEntry.SQL_DELETE_ENTRIES);
         db.execSQL(ServiceRequestDbContract.ContactEntry.SQL_DELETE_ENTRIES);
-        //db.execSQL(ServiceRequestDbContract.RequestEntry.SQL_DELETE_ENTRIES);
+        db.execSQL(ServiceRequestDbContract.RequestEntry.SQL_DELETE_ENTRIES);
+        db.execSQL(ServiceRequestDbContract.PointEntry.SQL_DELETE_ENTRIES);
         onCreate(db);
     }
 

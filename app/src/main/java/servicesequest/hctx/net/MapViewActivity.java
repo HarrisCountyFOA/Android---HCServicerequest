@@ -1,6 +1,7 @@
 package servicesequest.hctx.net;
 
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -20,6 +21,12 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.content.ContextCompat;
 
+import com.android.volley.DefaultRetryPolicy;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.Volley;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -29,16 +36,23 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 import java.util.HashMap;
 import java.util.List;
 
+import servicesequest.hctx.net.Async.PointListAsync;
 import servicesequest.hctx.net.Async.RequestListAsync;
+import servicesequest.hctx.net.DAL.PointDataManager;
 import servicesequest.hctx.net.DAL.RequestInfoWindowAdapater;
 import servicesequest.hctx.net.DAL.ServiceRequestDbContract;
 import servicesequest.hctx.net.DAL.ServiceRequestDbHelper;
+import servicesequest.hctx.net.Model.GeoPoint;
 import servicesequest.hctx.net.Model.Request;
 import servicesequest.hctx.net.Utility.AppPreferences;
 import servicesequest.hctx.net.Utility.Utils;
@@ -54,6 +68,9 @@ public class MapViewActivity extends AppCompatActivity implements OnMapReadyCall
     static final float COORDINATE_OFFSET = 0.00002f;
     int MAX_NUMBER_OF_MARKERS = 5;
     boolean loadData = true;
+    private RequestQueue queue;
+    final String requestURL = "https://www.gis.hctx.net/arcgis/rest/services/repository/HCAD_Counties/MapServer/0/query?where=1%3D1&outFields=*&outSR=4326&f=json";
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -64,6 +81,7 @@ public class MapViewActivity extends AppCompatActivity implements OnMapReadyCall
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayShowTitleEnabled(false);
         getSupportActionBar().setDisplayHomeAsUpEnabled(false);
+
         _appPrefs = new AppPreferences(this, "UserProfile");
 
         navigation = findViewById(R.id.navigation);
@@ -96,6 +114,9 @@ public class MapViewActivity extends AppCompatActivity implements OnMapReadyCall
                 startActivityForResult(ti, 1);
             }
         });
+
+        queue = Volley.newRequestQueue(this);
+
     }
 
     @Override
@@ -157,7 +178,7 @@ public class MapViewActivity extends AppCompatActivity implements OnMapReadyCall
      * installed Google Play services and returned to the app.
      */
     @Override
-    public void onMapReady(GoogleMap googleMap) {
+    public void onMapReady(final GoogleMap googleMap) {
         mMap = googleMap;
 
         mMap.setInfoWindowAdapter(new RequestInfoWindowAdapater(MapViewActivity.this));
@@ -188,6 +209,84 @@ public class MapViewActivity extends AppCompatActivity implements OnMapReadyCall
         });
 
         LoadData();
+
+        final PolylineOptions options = new PolylineOptions();
+
+        PointListAsync asyncTask = new PointListAsync(this, new PointListAsync.OnTaskCompleted() {
+            @Override
+            public void taskCompleted(final List<GeoPoint> results) {
+                try {
+
+                    if (results.size() == 0) {
+                        final ProgressDialog pd = new ProgressDialog(MapViewActivity.this, R.style.MyDialogTheme);
+                        pd.setTitle("Loading Map");
+                        pd.setMessage("Please wait...");
+                        pd.setCancelable(false);
+                        pd.show();
+                        JsonObjectRequest request = new JsonObjectRequest(com.android.volley.Request.Method.GET, requestURL, null, new Response.Listener<JSONObject>() {
+                            @Override
+                            public void onResponse(JSONObject response) {
+                                try {
+                                    ServiceRequestDbHelper dbHelper = new ServiceRequestDbHelper(getApplicationContext());
+                                    PointDataManager datamanager = new PointDataManager();
+                                    JSONArray jresults = ((JSONArray) ((JSONObject) ((JSONObject) response.getJSONArray("features").get(0)).get("geometry")).getJSONArray("rings").get(0));
+
+                                    if (jresults.length() > 0) {
+                                        int len = jresults.length();
+                                        for (int i = 0; i < len; i++) {
+                                            JSONArray point = (JSONArray) jresults.get(i);
+                                            GeoPoint p = new GeoPoint();
+                                            p.lat = point.get(1).toString();
+                                            p.longit = point.get(0).toString();
+                                            results.add(p);
+                                        }
+
+                                        datamanager.add_points(dbHelper, results);
+
+                                        for (int i = 0; i < results.size(); i++) {
+                                            GeoPoint p = results.get(i);
+                                            options.add(new LatLng(Double.parseDouble(p.lat), Double.parseDouble(p.longit)));
+                                            options.width(3);
+                                            int colorPrimary = ContextCompat.getColor(MapViewActivity.this, R.color.ColorPrimaryText);
+                                            options.color(colorPrimary);
+                                        }
+
+                                        googleMap.addPolyline(options);
+                                        pd.dismiss();
+                                    }
+                                    // displayDialog(placePrediction, result);
+                                } catch (Exception e) {
+                                }
+                            }
+                        }, new Response.ErrorListener() {
+                            @Override
+                            public void onErrorResponse(VolleyError error) {
+                            }
+                        });
+
+                        request.setRetryPolicy(new DefaultRetryPolicy(
+                                5000,
+                                DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
+                                DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
+                        queue.add(request);
+                    } else if (results.size() > 0) {
+                        for (int i = 0; i < results.size(); i++) {
+                            GeoPoint p = results.get(i);
+                            options.add(new LatLng(Double.parseDouble(p.lat), Double.parseDouble(p.longit)));
+                            options.width(3);
+                            int colorPrimary = ContextCompat.getColor(MapViewActivity.this, R.color.ColorPrimaryText);
+                            options.color(colorPrimary);
+                        }
+                        googleMap.addPolyline(options);
+                    }
+                } catch (Exception ex) {
+                    String Info = "There was a problem loading map. Please try again later.<br><br>";
+                    Utils.customPopMessge(getApplicationContext(), "Error", Info + ex.getMessage(), "error");
+                }
+            }
+        });
+        asyncTask.execute();
+
     }
 
     private void LoadData() {

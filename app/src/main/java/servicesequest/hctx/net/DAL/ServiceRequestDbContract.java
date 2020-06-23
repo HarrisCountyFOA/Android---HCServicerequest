@@ -1,7 +1,6 @@
 package servicesequest.hctx.net.DAL;
 
 import android.provider.BaseColumns;
-import java.lang.Integer;
 
 public final  class ServiceRequestDbContract {
 
@@ -118,5 +117,21 @@ public final  class ServiceRequestDbContract {
 
         public static final String SQL_DELETE_ENTRIES =
                 "DROP TABLE IF EXISTS " + RequestEntry.TABLE_NAME;
+    }
+
+    public static class PointEntry implements BaseColumns {
+        public static final String TABLE_NAME = "point";
+        public static final String COLUMN_ID = _ID;
+        public static final String COLUMN_NAME_LAT= "lat";
+        public static final String COLUMN_NAME_LONG= "long";
+
+        public static final String SQL_CREATE_ENTRIES =
+                "CREATE TABLE " + PointEntry.TABLE_NAME + " (" +
+                        COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                        COLUMN_NAME_LAT + " TEXT, " +
+                        COLUMN_NAME_LONG + " TEXT)";
+
+        public static final String SQL_DELETE_ENTRIES =
+                "DROP TABLE IF EXISTS " + PointEntry.TABLE_NAME;
     }
 }
