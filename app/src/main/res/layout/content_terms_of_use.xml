@@ -11,8 +11,8 @@
 
     <ImageView
         android:id="@+id/hcavatar"
-        android:layout_width="150dp"
-        android:layout_height="150dp"
+        android:layout_width="75dp"
+        android:layout_height="73dp"
         android:contentDescription="thumbnail"
         android:scaleType="centerCrop"
         app:layout_constraintEnd_toEndOf="parent"
