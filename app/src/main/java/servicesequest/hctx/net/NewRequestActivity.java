@@ -725,6 +725,7 @@ public class NewRequestActivity extends AppCompatActivity implements LocationLis
 
                     myLocation = result.geometry.location;
                     initMap();
+                    RequestTypeSet.requestTypeSet.clear();
                     AddressCheck();
                     // displayDialog(placePrediction, result);
                 } catch (JSONException e) {
@@ -810,12 +811,13 @@ public class NewRequestActivity extends AppCompatActivity implements LocationLis
     }
     RequestTypeAsync requestTypeAsyncTask;
     public void AddressCheck() {
+
+
         requestTypeAsyncTask = new RequestTypeAsync(this, myLocation.latitude, myLocation.longitude, new RequestTypeAsync.OnTaskCompleted() {
             @Override
             public void taskCompleted(Boolean results) {
 
                 spinnerArrayAdapterRequest.clear();
-
 
                 RequestType = null;
                 RequestTypeValue = null;
@@ -863,14 +865,14 @@ public class NewRequestActivity extends AppCompatActivity implements LocationLis
                 } else {
                     Precinct = "0";
                     cmView.setVisibility(View.GONE);
-                    Toast.makeText(getApplicationContext(), getResources().getString(R.string.ErrInvalidHarrisCountyAddress), Toast.LENGTH_LONG).show();
+                    //Toast.makeText(getApplicationContext(), getResources().getString(R.string.ErrInvalidHarrisCountyAddress), Toast.LENGTH_LONG).show();
+                    new AlertDialog.Builder(NewRequestActivity.this)
+                            .setTitle("Out of Bounds")
+                            .setMessage("Request can only be submitted within Harris County boundaries")
+                            .setPositiveButton(android.R.string.ok, null)
+                            .show();
                 }
                 //  txtAddress.setText(FullAddress);
-
-
-//                if (_appPrefs.getString(ProfileSet.PROFILE_EMAIL).equals("")) {
-//                    showSimplePopUp();
-//                }
             }
         });
         requestTypeAsyncTask.execute();
@@ -989,7 +991,7 @@ public class NewRequestActivity extends AppCompatActivity implements LocationLis
                     Toast.makeText(NewRequestActivity.this, R.string.requestCameraPermissions, Toast.LENGTH_SHORT).show();
                 }
                 else if (permission.equals("android.permission.ACCESS_FINE_LOCATION")) {
-                    Toast.makeText(NewRequestActivity.this, R.string.requestLocationPermissions, Toast.LENGTH_SHORT).show();
+                    //Toast.makeText(NewRequestActivity.this, R.string.requestLocationPermissions, Toast.LENGTH_SHORT).show();
                 }
                 else if (permission.equals("android.permission.WRITE_EXTERNAL_STORAGE")) {
                     Toast.makeText(NewRequestActivity.this, R.string.requestStoragePermissions, Toast.LENGTH_SHORT).show();
