@@ -142,7 +142,7 @@ public class RequestDetailsActivity extends AppCompatActivity {
                             int height = bmp.getHeight();
                             ConstraintLayout.LayoutParams parms = new ConstraintLayout.LayoutParams(avatar.getWidth(), dpToPx(height, getApplicationContext()));
                             avatar.setLayoutParams(parms);
-                            avatar.setScaleType(ImageView.ScaleType.FIT_XY);
+                            avatar.setScaleType(ImageView.ScaleType.CENTER_CROP);
                             avatar.setImageBitmap(bmp);
 
                             avatar.setVisibility(View.VISIBLE);
