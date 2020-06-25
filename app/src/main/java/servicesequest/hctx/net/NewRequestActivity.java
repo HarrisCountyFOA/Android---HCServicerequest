@@ -54,10 +54,12 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.cardview.widget.CardView;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
@@ -74,6 +76,7 @@ import com.google.android.gms.maps.UiSettings;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.libraries.places.api.Places;
@@ -100,12 +103,15 @@ import java.util.List;
 import java.util.Locale;
 
 import servicesequest.hctx.net.Async.NewRequestAsync;
+import servicesequest.hctx.net.Async.PointListAsync;
 import servicesequest.hctx.net.DAL.ContactDataManager;
 import servicesequest.hctx.net.DAL.LatLngAdapter;
 import servicesequest.hctx.net.DAL.PlacePredictionAdapter;
+import servicesequest.hctx.net.DAL.PointDataManager;
 import servicesequest.hctx.net.DAL.RequestDataManager;
 import servicesequest.hctx.net.DAL.RequestTypeAsync;
 import servicesequest.hctx.net.DAL.ServiceRequestDbHelper;
+import servicesequest.hctx.net.Model.GeoPoint;
 import servicesequest.hctx.net.Model.GeocodingResult;
 import servicesequest.hctx.net.Model.RequestTypeSelectSet;
 import servicesequest.hctx.net.Model.RequestTypeSet;
@@ -172,6 +178,7 @@ public class NewRequestActivity extends AppCompatActivity implements LocationLis
     ConstraintLayout itemConstraintLayout;
     ImageButton imbtMyLocation;
     private ProgressDialog pd;
+    final String requestURL = "https://www.gis.hctx.net/arcgis/rest/services/repository/HCAD_Counties/MapServer/0/query?where=1%3D1&outFields=*&outSR=4326&f=json";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -390,6 +397,80 @@ public class NewRequestActivity extends AppCompatActivity implements LocationLis
         });
     }
 
+    public void LoadPointList()
+    {
+        final PolylineOptions options = new PolylineOptions();
+
+        PointListAsync asyncTask = new PointListAsync(this, new PointListAsync.OnTaskCompleted() {
+            @Override
+            public void taskCompleted(final List<GeoPoint> results) {
+                try {
+
+                    if (results.size() == 0) {
+                        final ProgressDialog pd = new ProgressDialog(NewRequestActivity.this, R.style.MyDialogTheme);
+                        JsonObjectRequest request = new JsonObjectRequest(com.android.volley.Request.Method.GET, requestURL, null, new Response.Listener<JSONObject>() {
+                            @Override
+                            public void onResponse(JSONObject response) {
+                                try {
+                                    ServiceRequestDbHelper dbHelper = new ServiceRequestDbHelper(getApplicationContext());
+                                    PointDataManager datamanager = new PointDataManager();
+                                    JSONArray jresults = ((JSONArray) ((JSONObject) ((JSONObject) response.getJSONArray("features").get(0)).get("geometry")).getJSONArray("rings").get(0));
+
+                                    if (jresults.length() > 0) {
+                                        int len = jresults.length();
+                                        for (int i = 0; i < len; i++) {
+                                            JSONArray point = (JSONArray) jresults.get(i);
+                                            GeoPoint p = new GeoPoint();
+                                            p.lat = point.get(1).toString();
+                                            p.longit = point.get(0).toString();
+                                            results.add(p);
+                                        }
+
+                                        datamanager.add_points(dbHelper, results);
+
+                                        for (int i = 0; i < results.size(); i++) {
+                                            GeoPoint p = results.get(i);
+                                            options.add(new LatLng(Double.parseDouble(p.lat), Double.parseDouble(p.longit)));
+                                            options.width(3);
+                                            int colorPrimary = ContextCompat.getColor(NewRequestActivity.this, R.color.ColorPrimaryText);
+                                            options.color(colorPrimary);
+                                        }
+
+                                        mMapMni.addPolyline(options);
+                                    }
+                                    // displayDialog(placePrediction, result);
+                                } catch (Exception e) {
+                                }
+                            }
+                        }, new Response.ErrorListener() {
+                            @Override
+                            public void onErrorResponse(VolleyError error) {
+                            }
+                        });
+
+                        request.setRetryPolicy(new DefaultRetryPolicy(
+                                5000,
+                                DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
+                                DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
+                        queue.add(request);
+                    } else if (results.size() > 0) {
+                        for (int i = 0; i < results.size(); i++) {
+                            GeoPoint p = results.get(i);
+                            options.add(new LatLng(Double.parseDouble(p.lat), Double.parseDouble(p.longit)));
+                            options.width(3);
+                            int colorPrimary = ContextCompat.getColor(NewRequestActivity.this, R.color.ColorPrimaryText);
+                            options.color(colorPrimary);
+                        }
+                        mMapMni.addPolyline(options);
+                    }
+                } catch (Exception ex) {
+                    String Info = "There was a problem loading map outline<br><br>";
+                    Utils.customPopMessge(getApplicationContext(), "Error", Info + ex.getMessage(), "error");
+                }
+            }
+        });
+        asyncTask.execute();
+    }
 
     public void CameraPopUp(Boolean item) {
 
@@ -439,7 +520,6 @@ public class NewRequestActivity extends AppCompatActivity implements LocationLis
 
         builder.show();
     }
-
 
     protected void onActivityResult(int requestCode, int resultCode, Intent imageReturnedIntent) {
         super.onActivityResult(requestCode, resultCode, imageReturnedIntent);
@@ -921,6 +1001,7 @@ public class NewRequestActivity extends AppCompatActivity implements LocationLis
         mMapMni.clear();
         Marker perth = mMapMni.addMarker(new MarkerOptions().position(hc).draggable(true));
         MarkerDrag();
+        LoadPointList();
     }
 
     public void MarkerDrag() {
