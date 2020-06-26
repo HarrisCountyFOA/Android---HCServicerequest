@@ -179,6 +179,7 @@ public class NewRequestActivity extends AppCompatActivity implements LocationLis
     ImageButton imbtMyLocation;
     private ProgressDialog pd;
     final String requestURL = "https://www.gis.hctx.net/arcgis/rest/services/repository/HCAD_Counties/MapServer/0/query?where=1%3D1&outFields=*&outSR=4326&f=json";
+    boolean LocationDisableMsg = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -320,6 +321,7 @@ public class NewRequestActivity extends AppCompatActivity implements LocationLis
         imbtMyLocation.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                LocationDisableMsg = true;
                 StartLocation();
 
             }
@@ -1091,7 +1093,17 @@ public class NewRequestActivity extends AppCompatActivity implements LocationLis
 
                 } else {
                     //System.out.println("######################  don't ask:" + permission);
-                    Toast.makeText(NewRequestActivity.this, R.string.requestPermissionsDontAsk, Toast.LENGTH_SHORT).show();
+                    if (permission.equals("android.permission.CAMERA")) {
+                        Toast.makeText(NewRequestActivity.this, R.string.requestPermissionsDontAsk, Toast.LENGTH_SHORT).show();
+                    }
+                    else if (permission.equals("android.permission.ACCESS_FINE_LOCATION") && LocationDisableMsg) {
+                        Toast.makeText(NewRequestActivity.this, R.string.requestPermissionsDontAsk, Toast.LENGTH_LONG).show();
+                        LocationDisableMsg = false;
+                    }
+                    else if (permission.equals("android.permission.WRITE_EXTERNAL_STORAGE")) {
+                        Toast.makeText(NewRequestActivity.this, R.string.requestPermissionsDontAsk, Toast.LENGTH_SHORT).show();
+                    }
+
                 }
             }
         }
