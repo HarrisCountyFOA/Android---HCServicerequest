@@ -16,13 +16,14 @@
         <androidx.cardview.widget.CardView
             android:id="@+id/RequestListCardView"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
             android:layout_margin="10dp"
             android:layout_marginTop="0dp"
             android:layout_marginBottom="0dp"
             app:cardBackgroundColor="@color/Border"
             app:cardCornerRadius="5dp"
-            app:contentPaddingBottom="16dp">
+            app:contentPaddingBottom="16dp"
+            tools:ignore="MissingConstraints">
 
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:id="@+id/itemConstraintLayout"
@@ -38,6 +39,7 @@
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent"
+                    android:adjustViewBounds="true"
                     app:srcCompat="@android:drawable/ic_menu_camera" />
 
                 <TextView
