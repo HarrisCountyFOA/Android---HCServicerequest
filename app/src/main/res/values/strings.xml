@@ -16,23 +16,23 @@
     <string name="pick_image_intent_text">Choose an image</string>
   <string name="mapbox_access_token">pk.eyJ1IjoiZ2FuZGhpeWFuZGFwYWxsaSIsImEiOiJja2I5eGNlYjkwaXBkMndscWtodXRvNDR1In0.tPhoYwHNkKgXi9_O04eiPg</string>
     <string name="large_text"> <![CDATA[
-       THIS MOBILE APP SHOULD NOT BE USED WHILE OPERATING A MOTOR VEHICLE.
+Please call 911 if you have an emergency.
 <p>
-BY USING THIS MOBILE APP, I EXPRESSLY WAIVE THE RIGHT TO CLAIM AGAINST HARRIS COUNTY, BY REASON OF, AND RELEASE HARRIS COUNTY FROM ANY LIABILITY WITH RESPECT TO, ANY INJURY TO PERSON OR DAMAGE TO OR LOSS OF PROPERTY (INCLUDING CONSEQUENTIAL DAMAGES) RESULTING FROM ANY CAUSE WHATSOEVER (INCLUDING THE USE OF THIS MOBILE APP WHILE OPERATING A MOTOR VEHICLE).
+This Mobile Application should not be used while operating a motor vehicle.
 <p>
-YOU EXPRESSLY UNDERSTAND AND AGREE THAT THE APPLICATION <u>SHOULD NOT BE USED</u>  FOR EMERGENCY SERVICES, OF ANY KIND.   HARRIS COUNTY ASSUMES NO LIABILITY FOR DAMAGES INCURRED DIRECTLY OR INDIRECTLY FROM [DIRECTLY OR INDIRECTLY ??] AS A RESULT OF YOUR USAGE  OF THE APPLICATION FOR EMERGENCIES OR OTHERWISE.  PLEASE DIAL 911 IF YOU HAVE AN EMERGENCY.
+By using this Mobile Application, I expressly waive the right to claim against Harris County, by reason of, and release Harris County firm any liability with respect to, any injury to person or damage to or loss of property (including consequential damages) resulting from any cause whatsoever (including the use of this Mobile App while operating a motor vehicle).
 <p>
-YOU EXPRESSLY UNDERSTAND AND AGREE THAT THE APPLICATION IS NOT INTENDED FOR USE IN THE OPERATION OF NUCLEAR FACILITIES, LIFE SUPPORT SYSTEMS, EMERGENCY COMMUNICATIONS,
-AIRCRAFT NAVIGATION OR COMMUNICATION SYSTEMS, AIR TRAFFIC CONTROL SYSTEMS, OR ANY OTHER ACTIVITIES IN WHICH THE USAGE OF THE APPLICATION COULD LEAD TO DEATH, PERSONAL INJURY, OR SEVERE PHYSICAL OR ENVIRONMENTAL DAMAGE.
+You expressly understand and agree that the Mobile Application should not be used for emergency services of any kind. Harris County assumes no liability for damages incurred directly or indirectly as a result of your usage of the Mobile App for emergencies or otherwise. Please call 911 if you have an emergency.
 <p>
-YOU EXPRESSLY UNDERSTAND AND AGREE THAT HARRIS COUNTY ASSUMES NO LIABILITY FOR DAMAGES INCURRED DIRECTLY OR INDIRECTLY AS A RESULT OF ERRORS, OMISSIONS OR
-DISCREPANCIES FROM DATA PROVIDED WITH USAGE OF THIS APPLICATION.
+You expressly understand and agree that the Mobile Application is not intended for use in the operation of nuclear facilities, life support systems, emergency communications, aircraft navigation or communication systems, air traffic control systems, or any other activities in which the usage of the Mobile Application could lead to death, personal injury, or severe physical or environmental damage.
 <p>
-YOU EXPRESSLY UNDERSTAND AND AGREE THAT HARRIS COUNTY IS NOT LIABLE TO YOU UNDER ANY THEORY OF LIABILITY FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, CONSEQUENTIAL OR EXEMPLARY DAMAGES THAT MAY BE INCURRED BY YOU THROUGH YOUR USE OF THE APPLICATION, INCLUDING ANY LOSS OF DATA OR DAMAGE TO YOUR MOBILE DEVICE, WHETHER OR NOT HARRIS COUNTY OR ITS REPRESENTATIVES HAVE BEEN ADVISED OF OR SHOULD HAVE BEEN AWARE OF THE POSSIBILITY OF ANY SUCH LOSSES ARISING OUT OF APPLICATION USAGE..
+You expressly understand and agree that Harris County assumes no liability for damages incurred directly or indirectly as a result of errors, omissions, or discrepancies from data provided with usage of this Mobile Application.
 <p>
-YOU EXPRESSLY UNDERSTAND AND AGREE THAT, TO THE MAXIMUM EXTENT PERMITTED BY LAW, YOU INDEMNIFY AND HOLD HARMLESS HARRIS COUNTY,  ITS AFFILIATES AND THEIR RESPECTIVE DIRECTORS, OFFICIALS, OFFICERS, EMPLOYEES AND AGENTS FROM AND AGAINST ANY AND ALL CLAIMS,  ACTIONS, SUITS OR PROCEEDINGS, AS WELL AS ANY AND ALL LOSSES, LIABILITIES, DAMAGES, COSTS AND EXPENSES (INCLUDING REASONABLE ATTORNEYS FEES) ARISING OUT OF OR ACCRUING FROM YOUR USE OF THE APPLICATION, INCLUDING YOUR DOWNLOADING, INSTALLATION, OR USE OF THE APPLICATION.
+You expressly understand and agree that Harris County is not liable to you under any theory of liability for any direct, indirect, incidental, special, consequential, or exemplary damages that may be incurred by you through your use of the Mobile Application, including any loss of data or damage to your mobile device, whether or not Harris County or its representatives have been advised of or should have been aware of the possibility of any such losses arising out of Mobile Application usage.
 <p>
-YOU EXPRESSLY UNDERSTAND AND AGREE THAT YOUR USE OF THE APPLICATION IS AT YOUR SOLE DISCRETION AND RISK AND THAT THE APPLICATION IS  PROVIDED AS IS AND AS AVAILABLE WITHOUT ANY WARRANTY OF ANY KIND AND THAT HARIS COUNTY DISCLAIMS ANY AND ALL WARRANTIES OR CONDITIONS, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+You expressly understand and agree that, to the maximum extent permitted by law, you indemnify and hold harmless Harris County, its affiliates and their respective directors, officials, officers, employees and agents from and against any and all claims, actions, suits or proceedings, as well as any and all losses, liabilities, damages, costs and expenses (including reasonable attorneys fees) arising out of or accruing from your use of the Mobile Application, including your downloading, installation, or use of the Mobile Application.
+<p>
+You expressly understand and agree that your use of the Mobile Application is at your sole discretion and risk and that the Mobile Application is provided as is and as available without any warranty of any kind and that Harris County disclaims any and all warranties or conditions, express or implied, including but not limited to the implied warranties of merchantability and fitness for a particular purpose.
 <p>
 <b>WARNING</b> - In case of Emergency, Call 911
         ]]></string>
