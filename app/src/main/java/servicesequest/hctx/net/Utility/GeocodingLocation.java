@@ -105,7 +105,7 @@ public class GeocodingLocation {
         return results;
     }
 
-    private static final String contactUrl = "https://appsqa.harriscountytx.gov/ServicesRequestMobile/GetAllPctContactInfo.json";
+    private static final String contactUrl = "https://apps.harriscountytx.gov/ServicesRequestMobile/GetAllPctContactInfo.json";
 
     public static List<contact> getContacts() {
         ArrayList<contact> results = new ArrayList<contact>();
