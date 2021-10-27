@@ -249,15 +249,18 @@ In case of an emergency, call 911.
 
     <!-- START NEW REQUEST -->
     <string name="Description">Description</string>
-    <string name="Type">Type</string>
+    <string name="Type">Service Request Type</string>
     <string name="Location">Location</string>
     <string name="Photo">Photo</string>
+  <string name="Category">Category</string>
 
 
     <string name="AddressHint"><font size="15">Enter an address</font></string>
     <string name="DescHint"><font size="15">Please enter a brief description of the issue you are reporting.</font></string>
-    <string name="TypeHint"><font size="15">Tab here to select a request type</font></string>
+    <string name="TypeHint"><font size="15">Tab here to select a service request type</font></string>
     <string name="TypePopupHint">Select Request Type</string>
+    <string name="CategoryPopupHint">Select Category Type</string>
+  <string name="CategoryHint"><font size="15">Tab here to select a service request category</font></string>
 
     <string name="RequestSuccess">Request Saved Successfully!!</string>
     <string name="RequestFailed">Failed to save request. Please try again!!</string>

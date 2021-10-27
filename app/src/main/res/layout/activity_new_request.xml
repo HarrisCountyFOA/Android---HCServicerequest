@@ -119,6 +119,13 @@
 
             </RelativeLayout>
 
+
+        <LinearLayout
+            android:id="@+id/CategorySection"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            >
             <View
                 android:layout_width="match_parent"
                 android:layout_height="1dp"
@@ -126,8 +133,47 @@
                 android:layout_marginTop="5dp"
                 android:background="@android:color/darker_gray"/>
 
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical"
+                >
+                <ImageView
+                    android:id="@+id/imgCategoryActive"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:src="@drawable/ic_check_circle_silver_24dp"
+                    />
+                <TextView
+                    android:layout_toRightOf="@+id/imgCategoryActive"
+                    android:textColor="@color/ColorPrimaryText"
+                    style="@style/TextLabel"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:paddingStart="8dp"
+                    android:text="@string/Category" />
+            </RelativeLayout >
+
+            <Spinner
+                android:id="@+id/spinnerCategory"
+                android:layout_width="match_parent"
+                android:layout_height="45dp"
+                android:layout_marginTop="5dp"
+                android:layout_marginBottom="10dp"
+                android:spinnerMode="dialog"
+
+                />
+        </LinearLayout>
 
 
+
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_marginBottom="5dp"
+                android:layout_marginTop="5dp"
+                android:background="@android:color/darker_gray"/>
 
             <RelativeLayout
                 android:layout_width="match_parent"
@@ -153,10 +199,11 @@
             <Spinner
                 android:id="@+id/spinnerRequest"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="45dp"
                 android:layout_marginTop="5dp"
                 android:layout_marginBottom="10dp"
                 android:spinnerMode="dialog"
+
                 />
 
             <View

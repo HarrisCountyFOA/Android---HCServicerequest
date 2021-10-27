@@ -68,8 +68,8 @@ public class PushDataKsoap {
 
 			//System.out.println("######################  request " + request);
 
-			HttpsTransportSE aht = new HttpsTransportSE("appsqa.harriscountytx.gov", 443, "/ServicesRequestMobile/MobileService.asmx", 30000); //QA
-			//HttpsTransportSE aht = new HttpsTransportSE("apps.harriscountytx.gov", 443, "/ServicesRequestMobile/MobileService.asmx", 30000); //Prod
+			//HttpsTransportSE aht = new HttpsTransportSE("appsqa.harriscountytx.gov", 443, "/ServicesRequestMobile/MobileService.asmx", 30000); //QA
+			HttpsTransportSE aht = new HttpsTransportSE("apps.harriscountytx.gov", 443, "/ServicesRequestMobile/MobileService.asmx", 30000); //Prod
 			AllCertificatesAndHostsTruster.apply();
 			aht.call(SOAP_ACTION, soapEnvelope);
 

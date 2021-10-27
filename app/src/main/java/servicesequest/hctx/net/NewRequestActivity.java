@@ -40,6 +40,7 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.ScrollView;
 import android.widget.Spinner;
@@ -102,8 +103,10 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Locale;
 
+import servicesequest.hctx.net.Async.CategoryTypeAsync;
 import servicesequest.hctx.net.Async.NewRequestAsync;
 import servicesequest.hctx.net.Async.PointListAsync;
+import servicesequest.hctx.net.Async.RequestNewTypeAsync;
 import servicesequest.hctx.net.DAL.ContactDataManager;
 import servicesequest.hctx.net.DAL.LatLngAdapter;
 import servicesequest.hctx.net.DAL.PlacePredictionAdapter;
@@ -111,6 +114,8 @@ import servicesequest.hctx.net.DAL.PointDataManager;
 import servicesequest.hctx.net.DAL.RequestDataManager;
 import servicesequest.hctx.net.DAL.RequestTypeAsync;
 import servicesequest.hctx.net.DAL.ServiceRequestDbHelper;
+import servicesequest.hctx.net.Model.CategoryTypeSelectSet;
+import servicesequest.hctx.net.Model.CategoryTypeSet;
 import servicesequest.hctx.net.Model.GeoPoint;
 import servicesequest.hctx.net.Model.GeocodingResult;
 import servicesequest.hctx.net.Model.RequestTypeSelectSet;
@@ -142,14 +147,21 @@ public class NewRequestActivity extends AppCompatActivity implements LocationLis
     ImageView btnPicture;
     TextInputEditText txtDescription;
     private int PICK_IMAGE_REQUEST = 1;
-    Spinner spinnerRequest;
+    Spinner spinnerRequest, spinnerCategory;
     ArrayAdapter<RequestTypeSelectSet> spinnerArrayAdapterRequest;
+    ArrayAdapter<CategoryTypeSelectSet> spinnerArrayAdapterCategory;
     public String Precinct = null;
     private Handler handler = new Handler();
 
     public String RequestType = null;
     public String RequestTypeValue = null;
     public int RequestTypeValuePosition = 0;
+
+    public String CategoryType = null;
+    public String CategoryTypeValue = null;
+    public String CategoryHC_OrderValue = null;
+    public int CategoryTypeValuePosition = 0;
+
     LatLng myLocation;
     ServiceRequestDbHelper dbHelper;
     RequestDataManager manager;
@@ -171,8 +183,9 @@ public class NewRequestActivity extends AppCompatActivity implements LocationLis
     FusedLocationProvider fusedLocationProvider;
     InputMethodManager inputManager;
 
-    ImageView imgDescActive,imgTypeActive,imgLocationActive,imgPhotoActive;
+    ImageView imgDescActive,imgTypeActive,imgLocationActive,imgPhotoActive,imgCategoryActive;
     int selectedItem = -1;
+    int selectedItemCategory = -1;
     public byte[] Bitmap_Image;
     Button btnPictureDelete;
     ConstraintLayout itemConstraintLayout;
@@ -180,6 +193,7 @@ public class NewRequestActivity extends AppCompatActivity implements LocationLis
     private ProgressDialog pd;
     final String requestURL = "https://www.gis.hctx.net/arcgis/rest/services/repository/HCAD_Counties/MapServer/0/query?where=1%3D1&outFields=*&outSR=4326&f=json";
     boolean LocationDisableMsg = false;
+    LinearLayout CategorySection;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -203,7 +217,6 @@ public class NewRequestActivity extends AppCompatActivity implements LocationLis
 
         StartLocation();
 
-
         placesClient = Places.createClient(this);
         queue = Volley.newRequestQueue(this);
         txtView = findViewById(R.id.place_search);
@@ -212,60 +225,16 @@ public class NewRequestActivity extends AppCompatActivity implements LocationLis
         txtAddPhoto = findViewById(R.id.txtAddPhoto);
         btnPicture = findViewById(R.id.btnPicture);
         spinnerRequest = findViewById(R.id.spinnerRequest);
+        spinnerCategory = findViewById(R.id.spinnerCategory);
         imbtMyLocation = findViewById(R.id.imbtMyLocation);
+        CategorySection = findViewById(R.id.CategorySection);
 
         //Make the keyboard have done using textMultiLine
         txtDescription.setImeOptions(EditorInfo.IME_ACTION_DONE);
         txtDescription.setRawInputType(InputType.TYPE_CLASS_TEXT);
 
-        RequestTypeSet.requestTypeSet.clear();
-
-        spinnerRequest = findViewById(R.id.spinnerRequest);
-        spinnerArrayAdapterRequest = new ArrayAdapter<RequestTypeSelectSet>(this, R.layout.style_spinner_layout){
-            @Override
-            public boolean isEnabled(int position) {
-                if (position == 0) {
-                    // Disable the first item from Spinner
-                    // First item will be use for hint
-                    return false;
-                } else {
-                    return true;
-                }
-            }
-
-            @Override
-            public View getDropDownView(int position, View convertView, ViewGroup parent) {
-                View view = super.getDropDownView(position, convertView, parent);
-
-                // If this is the selected item position
-                if (position == selectedItem)
-                    view.setBackgroundColor(Color.LTGRAY);
-                else
-                    view.setBackgroundColor(getResources().getColor(R.color.TextInputBackground));
-
-
-                // Set the hint text color gray/ hide the item in the popup
-                TextView tv = (TextView) view;
-                if (position == 0) {
-                    //tv.setVisibility(View.GONE);
-                    tv.setTextColor(getResources().getColor(R.color.TextInput));
-                    tv.setText(getResources().getString(R.string.TypePopupHint));
-                    tv.setTypeface(null, Typeface.BOLD);
-                    view.setBackgroundColor(Color.LTGRAY);
-                } else {
-                    //tv.setVisibility(View.VISIBLE);
-                    tv.setTextColor(getResources().getColor(R.color.TextInput));
-                    tv.setTypeface(null, Typeface.NORMAL);
-                }
-                return view;
-            }
-        };
-        spinnerArrayAdapterRequest.setDropDownViewResource(R.layout.style_spinner_dropdown_layout);
-
-        spinnerArrayAdapterRequest.add(new RequestTypeSelectSet("", ""));
-        spinnerRequest.setAdapter(spinnerArrayAdapterRequest);
-        spinnerRequest.setSelection(0, false);
-
+        CategoryType();
+        RequestType();
 
         viewAnimator = findViewById(R.id.view_animator);
         sessionToken = AutocompleteSessionToken.newInstance();
@@ -281,6 +250,7 @@ public class NewRequestActivity extends AppCompatActivity implements LocationLis
 
         imgDescActive = findViewById(R.id.imgDescActive);
         imgTypeActive = findViewById(R.id.imgTypeActive);
+        imgCategoryActive = findViewById(R.id.imgCategoryActive);
         imgLocationActive = findViewById(R.id.imgLocationActive);
         imgPhotoActive = findViewById(R.id.imgPhotoActive);
         btnPictureDelete = findViewById(R.id.btnPictureDelete);
@@ -327,35 +297,7 @@ public class NewRequestActivity extends AppCompatActivity implements LocationLis
             }
         });
 
-        spinnerRequest.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parentView, View selectedItemView, int position, long id) {
-                RequestTypeSelectSet rt = (RequestTypeSelectSet) spinnerRequest.getSelectedItem();
-                RequestTypeValuePosition = spinnerRequest.getSelectedItemPosition();
 
-                if (rt != null) {
-                    RequestType = rt.key;
-                    RequestTypeValue = String.valueOf(rt.value);
-
-                }
-
-                // First item is disable and it is used for hint
-                if(position > 0) {
-                    imgTypeActive.setImageResource(R.drawable.ic_check_circle_green_24dp);
-                    ((TextView) parentView.getChildAt(0)).setTextColor(getResources().getColor(R.color.TextInput));
-                    ((TextView) parentView.getChildAt(0)).setTextSize(18f);
-                }
-                else {
-                    imgTypeActive.setImageResource(R.drawable.ic_check_circle_silver_24dp);
-                }
-                selectedItem = position;
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> parentView) {
-                // your code here
-            }
-        });
 
 
 
@@ -395,6 +337,202 @@ public class NewRequestActivity extends AppCompatActivity implements LocationLis
                 else if (s.length() > 0)//Green Icon
                     imgDescActive.setImageResource(R.drawable.ic_check_circle_green_24dp);
 
+            }
+        });
+    }
+
+    public void CategoryType()
+    {
+        CategoryTypeSet.categoryTypeSet.clear();
+
+        spinnerArrayAdapterCategory = new ArrayAdapter<CategoryTypeSelectSet>(this, R.layout.style_spinner_layout){
+            @Override
+            public boolean isEnabled(int position) {
+                if (position == 0) {
+                    // Disable the first item from Spinner
+                    // First item will be use for hint
+                    return false;
+                } else {
+                    return true;
+                }
+            }
+
+            @Override
+            public View getDropDownView(int position, View convertView, ViewGroup parent) {
+                View view = super.getDropDownView(position, convertView, parent);
+
+                // If this is the selected item position
+                if (position == selectedItemCategory)
+                    view.setBackgroundColor(Color.LTGRAY);
+                else
+                    view.setBackgroundColor(getResources().getColor(R.color.TextInputBackground));
+
+
+                // Set the hint text color gray/ hide the item in the popup
+                TextView tv = (TextView) view;
+                if (position == 0) {
+                    //tv.setVisibility(View.GONE);
+                    tv.setTextColor(getResources().getColor(R.color.TextInput));
+                    tv.setText(getResources().getString(R.string.CategoryPopupHint));
+                    tv.setTypeface(null, Typeface.BOLD);
+                    view.setBackgroundColor(Color.LTGRAY);
+                } else {
+                    //tv.setVisibility(View.VISIBLE);
+                    tv.setTextColor(getResources().getColor(R.color.TextInput));
+                    tv.setTypeface(null, Typeface.NORMAL);
+                }
+                return view;
+            }
+        };
+        spinnerArrayAdapterCategory.setDropDownViewResource(R.layout.style_spinner_dropdown_layout);
+
+        spinnerArrayAdapterCategory.add(new CategoryTypeSelectSet("", "", ""));
+        spinnerCategory.setAdapter(spinnerArrayAdapterCategory);
+        spinnerCategory.setSelection(0, false);
+
+        spinnerCategory.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parentView, View selectedItemView, int position, long id) {
+                CategoryTypeSelectSet rt = (CategoryTypeSelectSet) spinnerCategory.getSelectedItem();
+                CategoryTypeValuePosition = spinnerCategory.getSelectedItemPosition();
+
+                if (rt != null) {
+                    CategoryType = rt.key;
+                    CategoryTypeValue = String.valueOf(rt.value);
+                    CategoryHC_OrderValue = rt.hc_order;
+                }
+
+                // First item is disable and it is used for hint
+                if(position > 0) {
+                    imgCategoryActive.setImageResource(R.drawable.ic_check_circle_green_24dp);
+                    ((TextView) parentView.getChildAt(0)).setTextColor(getResources().getColor(R.color.TextInput));
+                    ((TextView) parentView.getChildAt(0)).setTextSize(18f);
+                    RequestTypeSet.requestTypeSet.clear();
+                    getPctRequestType(CategoryTypeValue, CategoryHC_OrderValue);
+                }
+                else {
+                    imgCategoryActive.setImageResource(R.drawable.ic_check_circle_silver_24dp);
+                }
+                selectedItemCategory = position;
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parentView) {
+                // your code here
+            }
+        });
+    }
+
+    RequestNewTypeAsync requestNewTypeAsyncTask;
+    public void getPctRequestType(String Parm, String HC_Order)
+    {
+        requestNewTypeAsyncTask = new RequestNewTypeAsync(Parm, HC_Order, new RequestNewTypeAsync.OnTaskCompleted() {
+            @Override
+            public void taskCompleted(Boolean results) {
+
+                spinnerArrayAdapterRequest.clear();
+
+                RequestType = null;
+                RequestTypeValue = null;
+
+                spinnerArrayAdapterRequest.add(new RequestTypeSelectSet(getResources().getString(R.string.TypeHint), ""));
+
+                if (results) {
+                    for (RequestTypeSet type : RequestTypeSet.requestTypeSet) {
+                        spinnerArrayAdapterRequest.add(new RequestTypeSelectSet(type.Category, type.Code));
+                    }
+
+                    RequestTypeValuePosition = 0;
+
+                    spinnerRequest.setAdapter(spinnerArrayAdapterRequest);
+                    spinnerRequest.setSelection(RequestTypeValuePosition, false);
+
+
+
+                }
+            }
+        });
+        requestNewTypeAsyncTask.execute();
+
+    }
+
+    public void RequestType()
+    {
+        RequestTypeSet.requestTypeSet.clear();
+
+        spinnerArrayAdapterRequest = new ArrayAdapter<RequestTypeSelectSet>(this, R.layout.style_spinner_layout){
+            @Override
+            public boolean isEnabled(int position) {
+                if (position == 0) {
+                    // Disable the first item from Spinner
+                    // First item will be use for hint
+                    return false;
+                } else {
+                    return true;
+                }
+            }
+
+            @Override
+            public View getDropDownView(int position, View convertView, ViewGroup parent) {
+                View view = super.getDropDownView(position, convertView, parent);
+
+                // If this is the selected item position
+                if (position == selectedItem)
+                    view.setBackgroundColor(Color.LTGRAY);
+                else
+                    view.setBackgroundColor(getResources().getColor(R.color.TextInputBackground));
+
+
+                // Set the hint text color gray/ hide the item in the popup
+                TextView tv = (TextView) view;
+                if (position == 0) {
+                    //tv.setVisibility(View.GONE);
+                    tv.setTextColor(getResources().getColor(R.color.TextInput));
+                    tv.setText(getResources().getString(R.string.TypePopupHint));
+                    tv.setTypeface(null, Typeface.BOLD);
+                    view.setBackgroundColor(Color.LTGRAY);
+                } else {
+                    //tv.setVisibility(View.VISIBLE);
+                    tv.setTextColor(getResources().getColor(R.color.TextInput));
+                    tv.setTypeface(null, Typeface.NORMAL);
+                }
+                return view;
+            }
+        };
+        spinnerArrayAdapterRequest.setDropDownViewResource(R.layout.style_spinner_dropdown_layout);
+
+        spinnerArrayAdapterRequest.add(new RequestTypeSelectSet("", ""));
+        spinnerRequest.setAdapter(spinnerArrayAdapterRequest);
+        spinnerRequest.setSelection(0, false);
+
+        spinnerRequest.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parentView, View selectedItemView, int position, long id) {
+                RequestTypeSelectSet rt = (RequestTypeSelectSet) spinnerRequest.getSelectedItem();
+                RequestTypeValuePosition = spinnerRequest.getSelectedItemPosition();
+
+                if (rt != null) {
+
+                    RequestType = rt.key;
+                    RequestTypeValue = String.valueOf(rt.value);
+
+                }
+
+                // First item is disable and it is used for hint
+                if(position > 0) {
+                    imgTypeActive.setImageResource(R.drawable.ic_check_circle_green_24dp);
+                    ((TextView) parentView.getChildAt(0)).setTextColor(getResources().getColor(R.color.TextInput));
+                    ((TextView) parentView.getChildAt(0)).setTextSize(18f);
+                }
+                else {
+                    imgTypeActive.setImageResource(R.drawable.ic_check_circle_silver_24dp);
+                }
+                selectedItem = position;
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parentView) {
+                // your code here
             }
         });
     }
@@ -651,7 +789,7 @@ public class NewRequestActivity extends AppCompatActivity implements LocationLis
                 @Override
                 public void taskCompleted(Boolean results) {
                     if (results) {
-                       // setResult(RESULT_OK, new Intent());
+                        // setResult(RESULT_OK, new Intent());
                         //finish();
                         Toast.makeText(getApplicationContext(), getResources().getString(R.string.RequestSuccess), Toast.LENGTH_LONG).show();
 
@@ -808,6 +946,7 @@ public class NewRequestActivity extends AppCompatActivity implements LocationLis
                     myLocation = result.geometry.location;
                     initMap();
                     RequestTypeSet.requestTypeSet.clear();
+                    CategoryTypeSet.categoryTypeSet.clear();
                     AddressCheck();
                     // displayDialog(placePrediction, result);
                 } catch (JSONException e) {
@@ -892,9 +1031,38 @@ public class NewRequestActivity extends AppCompatActivity implements LocationLis
         return null;
     }
     RequestTypeAsync requestTypeAsyncTask;
+    CategoryTypeAsync categoryTypeAsyncTask;
+    public void buildCategoryType()
+    {
+        categoryTypeAsyncTask = new CategoryTypeAsync(this, new CategoryTypeAsync.OnTaskCompleted() {
+            @Override
+            public void taskCompleted(Boolean results) {
+
+                spinnerArrayAdapterCategory.clear();
+
+                CategoryType = null;
+                CategoryTypeValue = null;
+                CategoryHC_OrderValue = null;
+
+
+                spinnerArrayAdapterCategory.add(new CategoryTypeSelectSet(getResources().getString(R.string.CategoryHint), "", ""));
+
+                if (results) {
+                    for (CategoryTypeSet type : CategoryTypeSet.categoryTypeSet) {
+                        spinnerArrayAdapterCategory.add(new CategoryTypeSelectSet(type.Category, type.Code, type.HC_Order));
+                    }
+
+                    CategoryTypeValuePosition = 0;
+
+                    spinnerCategory.setAdapter(spinnerArrayAdapterCategory);
+                    spinnerCategory.setSelection(CategoryTypeValuePosition, false);
+                }
+            }
+        });
+        categoryTypeAsyncTask.execute();
+    }
+
     public void AddressCheck() {
-
-
         requestTypeAsyncTask = new RequestTypeAsync(this, myLocation.latitude, myLocation.longitude, new RequestTypeAsync.OnTaskCompleted() {
             @Override
             public void taskCompleted(Boolean results) {
@@ -907,16 +1075,30 @@ public class NewRequestActivity extends AppCompatActivity implements LocationLis
                 spinnerArrayAdapterRequest.add(new RequestTypeSelectSet(getResources().getString(R.string.TypeHint), ""));
 
                 if (results) {
-                    for (RequestTypeSet type : RequestTypeSet.requestTypeSet) {
-                        spinnerArrayAdapterRequest.add(new RequestTypeSelectSet(type.Category, type.Code));
+                    Precinct = getPrecinct(RequestTypeSet.requestTypeSet.get(1).Name);
+
+                    System.out.println("######################Precinct:" + Precinct);
+                    System.out.println("######################Name:" + RequestTypeSet.requestTypeSet.get(1).Name);
+
+                    if (Precinct.equals("Precinct 3"))
+                    {
+                        buildCategoryType();
+                        CategorySection.setVisibility(View.VISIBLE);
                     }
+                    else {
+                        CategorySection.setVisibility(View.GONE);
 
-                    if (!RequestTypeSet.requestTypeSet.get(1).Name.equals(Precinct))
-                        RequestTypeValuePosition = 0;
+                        for (RequestTypeSet type : RequestTypeSet.requestTypeSet) {
+                            spinnerArrayAdapterRequest.add(new RequestTypeSelectSet(type.Category, type.Code));
+                        }
+
+                        if (!RequestTypeSet.requestTypeSet.get(1).Name.equals(Precinct))
+                            RequestTypeValuePosition = 0;
 
 
-                    spinnerRequest.setAdapter(spinnerArrayAdapterRequest);
-                    spinnerRequest.setSelection(RequestTypeValuePosition, false);
+                        spinnerRequest.setAdapter(spinnerArrayAdapterRequest);
+                        spinnerRequest.setSelection(RequestTypeValuePosition, false);
+                    }
 
                     Precinct = getPrecinct(RequestTypeSet.requestTypeSet.get(1).Name);
 
@@ -1046,6 +1228,7 @@ public class NewRequestActivity extends AppCompatActivity implements LocationLis
 
         txtView.setText(Address);
         RequestTypeSet.requestTypeSet.clear();
+        CategoryTypeSet.categoryTypeSet.clear();
         AddressCheck();
         mapsearch = true;
     }

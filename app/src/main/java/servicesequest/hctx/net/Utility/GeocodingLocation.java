@@ -17,6 +17,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
+import servicesequest.hctx.net.Model.CategoryTypeSelectSet;
+import servicesequest.hctx.net.Model.CategoryTypeSet;
 import servicesequest.hctx.net.Model.Point;
 import servicesequest.hctx.net.Model.RequestTypeSet;
 import servicesequest.hctx.net.Model.contact;
@@ -75,6 +77,7 @@ public class GeocodingLocation {
 
     private static final String URL1 = "https://apps.harriscountytx.gov/ServicesRequestMobile/srm.svc/GetRequestTypePrecinct";
 
+
     public static boolean loadDB(Double x, Double y) {
         boolean results = true;
 
@@ -98,15 +101,72 @@ public class GeocodingLocation {
             }
 
         } catch (Exception e) {
-            Log.i("LOG", "Error: " + e.toString());
+            System.out.println("#############Error: " + e.toString());
             results = false;
         }
 
         return results;
     }
 
-    private static final String contactUrl = "https://apps.harriscountytx.gov/ServicesRequestMobile/GetAllPctContactInfo.json";
+    private static final String URLRequestCategory = "https://webapps2.harriscountytx.gov/servicerequestform/api/ServiceRequest/RequestCategory/pct3?language=en";
+    //private static final String URLRequestCategory = "https://appsqa3.harriscountytx.gov/servicerequestform/api/ServiceRequest/RequestCategory/pct3?language=en";
+    public static boolean getRequestCategory ()
+    {
+        boolean results = true;
+        try {
+            URL json = new URL(URLRequestCategory);
+            URLConnection jc = json.openConnection();
+            BufferedReader reader = new BufferedReader(new InputStreamReader(jc.getInputStream()));
+            String line = reader.readLine();
 
+            JSONArray jsonArray = new JSONArray(line);
+
+            for (int i = 0; i < jsonArray.length(); i++) {
+                JSONObject jObject = (JSONObject) jsonArray.get(i);
+
+                CategoryTypeSet.categoryTypeSet.add(new CategoryTypeSet(jObject.getString("hc_order"), jObject.getString("hc_name"),
+                        jObject.getString("hc_requesttypecategoryid")
+                ));
+            }
+
+        } catch (Exception e) {
+            System.out.println("#############Error: " + e.toString());
+            results = false;
+        }
+
+        return results;
+    }
+
+    private static final String URLRequestType = "https://webapps2.harriscountytx.gov/servicerequestform/api/ServiceRequest/RequestType/pct3?selectedRequestType=";
+    //private static final String URLRequestType = "https://appsqa3.harriscountytx.gov/servicerequestform/api/ServiceRequest/RequestType/pct3?selectedRequestType=";
+    public static boolean getRequestTypeFromCategory (String rcParam, String HC_Order)
+    {
+        boolean results = true;
+        try {
+            URL json = new URL(URLRequestType + HC_Order +"&language=en&rcParam=" + rcParam);
+            URLConnection jc = json.openConnection();
+            BufferedReader reader = new BufferedReader(new InputStreamReader(jc.getInputStream()));
+            String line = reader.readLine();
+
+            JSONArray jsonArray = new JSONArray(line);
+
+            for (int i = 0; i < jsonArray.length(); i++) {
+                JSONObject jObject = (JSONObject) jsonArray.get(i);
+
+                RequestTypeSet.requestTypeSet.add(new RequestTypeSet("Pct3_RequestType",
+                        jObject.getString("pim_name"),
+                        jObject.getString("pim_requesttypesid")
+                ));
+            }
+
+        } catch (Exception e) {
+            System.out.println("#############Error: " + e.toString());
+            results = false;
+        }
+
+        return results;
+    }
+    private static final String contactUrl = "https://apps.harriscountytx.gov/ServicesRequestMobile/GetAllPctContactInfo.json";
     public static List<contact> getContacts() {
         ArrayList<contact> results = new ArrayList<contact>();
 
